@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, MapPin } from 'lucide-react';
 
 const CATEGORIES = [
   { label: 'Dresses', cat: 'dresses' },
@@ -12,7 +12,7 @@ const CATEGORIES = [
 
 const COMPANY_LINKS = [
   { to: '/about', label: 'Our Story' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/contact', label: 'Customer Service' },
   { to: '/shop', label: 'Collections' },
 ];
 
@@ -99,6 +99,29 @@ export default function Footer() {
             </form>
           </div>
         </div>
+      </div>
+
+      {/* Map Section */}
+      <div className="max-w-[1400px] mx-auto px-5 sm:px-8 pb-12">
+        <div className="flex items-center gap-2 mb-4">
+          <MapPin size={14} className="text-stone-500" />
+          <h4 className="text-[10px] tracking-[0.25em] uppercase text-white font-semibold">Find Us</h4>
+        </div>
+        <div className="rounded-xl overflow-hidden border border-stone-800/50 aspect-[21/7] sm:aspect-[21/5]">
+          <iframe
+            title="Eclection Store Location"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.7!2d3.55!3d6.45!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMjcnMDAuMCJOIDPCsDMzJzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1"
+            width="100%"
+            height="100%"
+            style={{ border: 0, minHeight: 180 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+        <p className="text-[12px] text-stone-500 font-light mt-3">
+          5 Path Akachukwu Drive, Majek, Lekki–Epe Expressway, Lagos
+        </p>
       </div>
 
       <div className="border-t border-stone-800/60">

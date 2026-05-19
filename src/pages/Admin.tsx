@@ -60,10 +60,10 @@ export default function Admin() {
   }, [isAdmin, authLoading, user, navigate]);
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (authLoading || !isAdmin) return;
     fetchProducts();
     fetchOrders();
-  }, []);
+  }, [authLoading, isAdmin]);
 
   const fetchProducts = async () => {
     const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });

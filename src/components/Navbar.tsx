@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { to: '/', label: 'Home' },
   { to: '/shop', label: 'Shop' },
   { to: '/about', label: 'About' },
-  { to: '/contact', label: 'Contact' },
+  { to: '/contact', label: 'Customer Service' },
 ];
 
 const CURRENCY_OPTIONS: { code: CurrencyCode; symbol: string; label: string }[] = [
