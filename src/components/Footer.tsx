@@ -16,7 +16,7 @@ const COMPANY_LINKS = [
   { to: '/shop', label: 'Collections' },
 ];
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 const WHATSAPP_MESSAGE = 'Hello Eclection! I would like to inquire about your products.';
 
 export default function Footer() {
@@ -64,6 +64,23 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-[10px] tracking-[0.25em] uppercase text-white mb-5 font-semibold">Contact</h4>
+            <ul className="space-y-3">
+              <li className="text-sm font-light leading-relaxed">5 Path Akachukwu Drive, Majek, Lekki–Epe Expressway, Lagos</li>
+              <li>
+                <a href="tel:+2348081759542" className="text-sm font-light hover:text-white transition-colors duration-300">
+                  +234 808 175 9542
+                </a>
+              </li>
+              <li>
+                <a href="mailto:Meggieakenn@gmail.com" className="text-sm font-light hover:text-white transition-colors duration-300">
+                  Meggieakenn@gmail.com
+                </a>
+              </li>
             </ul>
           </div>
 

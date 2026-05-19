@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../hooks/useCart';
 import { useCurrency } from '../hooks/useCurrency';
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 
 export default function CartDrawer() {
   const { items, isOpen, toggleCart, removeItem, updateQuantity, total, itemCount } = useCart();

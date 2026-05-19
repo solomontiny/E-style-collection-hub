@@ -25,7 +25,7 @@ const STATUS_BAR: Record<string, string> = {
   delivered: 'bg-emerald-500',
 };
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 
 interface CustomerInfo {
   email: string;

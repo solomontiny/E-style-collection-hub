@@ -5,7 +5,7 @@ import { useCart } from '../hooks/useCart';
 import { useCurrency } from '../hooks/useCurrency';
 import { supabase } from '../lib/supabase';
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();

@@ -15,7 +15,7 @@ import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 
 function ScrollToTop() {
   const { pathname } = useLocation();

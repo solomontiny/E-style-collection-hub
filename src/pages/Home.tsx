@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import ProductCard from '../components/ProductCard';
 import type { Product } from '../types';
 
-const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_NUMBER = '2348081759542';
 
 export default function Home() {
   const [featured, setFeatured] = useState<Product[]>([]);
