@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageCircle } from 'lucide-react';
+
+const WHATSAPP_NUMBER = '2348000000000';
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -11,7 +13,6 @@ export default function Contact() {
 
   return (
     <div className="pt-[72px]">
-      {/* Hero */}
       <section className="relative h-[35vh] sm:h-[40vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -21,25 +22,23 @@ export default function Contact() {
         </div>
         <div className="relative z-10 text-center animate-fade-in">
           <p className="section-label text-stone-300 mb-3">Get in Touch</p>
-          <h1 className="text-4xl sm:text-5xl font-extralight text-white tracking-tight">Contact Us</h1>
+          <h1 className="text-4xl sm:text-5xl font-display font-medium text-white tracking-tight">Contact Us</h1>
         </div>
       </section>
 
       <section className="py-24 sm:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* Info */}
             <div>
               <p className="section-label mb-5">Reach Out</p>
-              <h2 className="text-3xl sm:text-4xl font-light text-stone-900 tracking-tight leading-[1.15]">
+              <h2 className="text-3xl sm:text-4xl font-display font-medium text-stone-900 tracking-tight leading-[1.15]">
                 We would love
                 <br />
-                <span className="italic font-extralight">to hear from you</span>
+                <span className="italic font-normal">to hear from you</span>
               </h2>
               <p className="mt-6 text-stone-500 font-light leading-[1.8] text-[15px] max-w-md">
                 Whether you have a question about our collections, need styling advice, or simply want to share your
-                experience, our team is here for you. Reach out through any of the channels below, or fill in the
-                form and we will respond within 24 hours.
+                experience, our team is here for you.
               </p>
 
               <div className="mt-10 space-y-6">
@@ -60,9 +59,17 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
+
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Eclection! I would like to get in touch.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 mt-8 text-[11px] tracking-[0.12em] uppercase font-medium text-emerald-600 border border-emerald-200 px-5 py-3 hover:bg-emerald-50 transition-colors"
+              >
+                <MessageCircle size={14} /> Chat on WhatsApp
+              </a>
             </div>
 
-            {/* Form */}
             <div>
               {submitted ? (
                 <div className="bg-stone-50 p-12 sm:p-16 text-center animate-scale-in">
@@ -102,9 +109,7 @@ export default function Contact() {
                     <label className="block text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-2 font-semibold">Message</label>
                     <textarea rows={5} required className="input-field resize-none" />
                   </div>
-                  <button type="submit" className="btn-primary w-full mt-2">
-                    Send Message
-                  </button>
+                  <button type="submit" className="btn-primary w-full mt-2">Send Message</button>
                 </form>
               )}
             </div>

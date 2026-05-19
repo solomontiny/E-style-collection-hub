@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -29,6 +29,10 @@
 }
 
 @layer components {
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 bg-stone-900 text-white px-8 py-3.5 text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 hover:bg-stone-700 active:scale-[0.98];
   }
@@ -56,6 +60,10 @@
   .card-hover {
     @apply transition-all duration-500 hover:shadow-lg hover:shadow-stone-200/50;
   }
+
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
+  }
 }
 
 @layer utilities {
@@ -69,4 +77,6 @@
   .animate-delay-400 { animation-delay: 400ms; }
   .animate-delay-500 { animation-delay: 500ms; }
   .animate-delay-600 { animation-delay: 600ms; }
+  .animate-delay-700 { animation-delay: 700ms; }
+  .animate-delay-800 { animation-delay: 800ms; }
 }

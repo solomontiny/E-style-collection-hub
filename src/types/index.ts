@@ -28,8 +28,18 @@ export interface Order {
   city: string;
   postal_code: string;
   country: string;
+  phone?: string;
   total: number;
   status: string;
+  created_at: string;
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'customer';
+  phone: string;
   created_at: string;
 }
 

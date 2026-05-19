@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import type { Product } from '../types';
+import { useCurrency } from '../hooks/useCurrency';
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { format } = useCurrency();
+
   return (
     <Link to={`/product/${product.id}`} className="group block">
       <div className="relative overflow-hidden bg-stone-50 aspect-[3/4]">
@@ -33,7 +36,7 @@ export default function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="mt-3.5">
         <h3 className="text-[13px] font-medium text-stone-800 tracking-wide truncate">{product.name}</h3>
-        <p className="text-[13px] font-medium text-stone-900 mt-1">${product.price.toLocaleString()}</p>
+        <p className="text-[13px] font-medium text-stone-900 mt-1">{format(product.price)}</p>
       </div>
     </Link>
   );

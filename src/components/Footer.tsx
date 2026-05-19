@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { MessageCircle } from 'lucide-react';
 
 const CATEGORIES = [
   { label: 'Dresses', cat: 'dresses' },
@@ -15,32 +16,37 @@ const COMPANY_LINKS = [
   { to: '/shop', label: 'Collections' },
 ];
 
+const WHATSAPP_NUMBER = '2348000000000';
+const WHATSAPP_MESSAGE = 'Hello Eclection! I would like to inquire about your products.';
+
 export default function Footer() {
   return (
     <footer className="bg-stone-950 text-stone-400">
-      {/* Main Footer */}
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 pt-20 pb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {/* Brand */}
           <div className="sm:col-span-2 lg:col-span-1">
-            <Link to="/" className="text-xl font-extralight tracking-[0.35em] uppercase text-white">
+            <Link to="/" className="text-xl font-display font-medium tracking-[0.2em] uppercase text-white">
               Eclection
             </Link>
             <p className="mt-5 text-sm font-light leading-relaxed max-w-xs">
               Curating exceptional fashion for the discerning individual. Where artistry meets elegance.
             </p>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 mt-5 text-[11px] tracking-[0.12em] uppercase font-medium text-emerald-400 hover:text-emerald-300 transition-colors"
+            >
+              <MessageCircle size={14} /> Chat on WhatsApp
+            </a>
           </div>
 
-          {/* Collections */}
           <div>
             <h4 className="text-[10px] tracking-[0.25em] uppercase text-white mb-5 font-semibold">Collections</h4>
             <ul className="space-y-2.5">
               {CATEGORIES.map((item) => (
                 <li key={item.cat}>
-                  <Link
-                    to={`/shop?category=${item.cat}`}
-                    className="text-sm font-light hover:text-white transition-colors duration-300"
-                  >
+                  <Link to={`/shop?category=${item.cat}`} className="text-sm font-light hover:text-white transition-colors duration-300">
                     {item.label}
                   </Link>
                 </li>
@@ -48,7 +54,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
           <div>
             <h4 className="text-[10px] tracking-[0.25em] uppercase text-white mb-5 font-semibold">Company</h4>
             <ul className="space-y-2.5">
@@ -62,7 +67,6 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Newsletter */}
           <div>
             <h4 className="text-[10px] tracking-[0.25em] uppercase text-white mb-5 font-semibold">Newsletter</h4>
             <p className="text-sm font-light mb-4 leading-relaxed">Receive exclusive updates on new collections and events.</p>
@@ -72,10 +76,7 @@ export default function Footer() {
                 placeholder="Your email"
                 className="flex-1 min-w-0 bg-stone-900 border border-stone-800 px-4 py-3 text-sm text-white placeholder-stone-600 focus:outline-none focus:border-stone-600 transition-colors"
               />
-              <button
-                type="submit"
-                className="bg-white text-stone-950 px-5 py-3 text-[10px] tracking-[0.15em] uppercase font-semibold hover:bg-stone-200 transition-colors flex-shrink-0"
-              >
+              <button type="submit" className="bg-white text-stone-950 px-5 py-3 text-[10px] tracking-[0.15em] uppercase font-semibold hover:bg-stone-200 transition-colors flex-shrink-0">
                 Join
               </button>
             </form>
@@ -83,7 +84,6 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-stone-800/60">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8 py-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-[11px] font-light tracking-wider text-stone-500">

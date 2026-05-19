@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Package, ShoppingBag, DollarSign, Plus, Pencil, Trash2, X, BarChart3, TrendingUp } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Package, ShoppingBag, DollarSign, Users, Plus, Pencil, Trash2, X,
+  BarChart3, TrendingUp, Search, ChevronDown, MessageCircle, Eye,
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { useCurrency } from '../hooks/useCurrency';
 import type { Product, Order, OrderItem } from '../types';
 
-type Tab = 'products' | 'orders' | 'summary';
+type Tab = 'overview' | 'products' | 'orders' | 'customers';
 
 const STATUS_COLORS: Record<string, string> = {
   pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -20,13 +25,36 @@ const STATUS_BAR: Record<string, string> = {
   delivered: 'bg-emerald-500',
 };
 
+const WHATSAPP_NUMBER = '2348000000000';
+
+interface CustomerInfo {
+  email: string;
+  name: string;
+  orders: number;
+  total: number;
+  lastOrder: string;
+}
+
 export default function Admin() {
-  const [tab, setTab] = useState<Tab>('products');
+  const { isAdmin, loading: authLoading } = useAuth();
+  const { format } = useCurrency();
+  const navigate = useNavigate();
+
+  const [tab, setTab] = useState<Tab>('overview');
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<(Order & { items?: OrderItem[] })[]>([]);
+  const [customers, setCustomers] = useState<CustomerInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [orderFilter, setOrderFilter] = useState('all');
+
+  useEffect(() => {
+    if (!authLoading && !isAdmin) {
+      navigate('/login');
+    }
+  }, [isAdmin, authLoading, navigate]);
 
   useEffect(() => {
     fetchProducts();
@@ -48,6 +76,29 @@ export default function Admin() {
         items: (items || []).filter((i) => i.order_id === order.id),
       }));
       setOrders(withItems);
+
+      // Build customer list from orders
+      const customerMap = new Map<string, CustomerInfo>();
+      data.forEach((order) => {
+        const key = order.email;
+        const existing = customerMap.get(key);
+        if (existing) {
+          existing.orders += 1;
+          existing.total += Number(order.total);
+          if (new Date(order.created_at) > new Date(existing.lastOrder)) {
+            existing.lastOrder = order.created_at;
+          }
+        } else {
+          customerMap.set(key, {
+            email: order.email,
+            name: order.full_name,
+            orders: 1,
+            total: Number(order.total),
+            lastOrder: order.created_at,
+          });
+        }
+      });
+      setCustomers(Array.from(customerMap.values()).sort((a, b) => b.total - a.total));
     } else {
       const local = JSON.parse(localStorage.getItem('eclection_orders') || '[]');
       setOrders(local);
@@ -66,11 +117,33 @@ export default function Admin() {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
   };
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+  const totalRevenue = orders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
   const totalOrders = orders.length;
   const pendingOrders = orders.filter((o) => o.status === 'pending').length;
-  const deliveredOrders = orders.filter((o) => o.status === 'delivered').length;
+
   const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  const filteredOrders = orders.filter((o) => {
+    const matchesSearch = !searchQuery ||
+      o.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.email?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = orderFilter === 'all' || o.status === orderFilter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const filteredProducts = products.filter((p) =>
+    !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (authLoading) {
+    return (
+      <div className="pt-[72px] min-h-screen flex items-center justify-center bg-stone-50">
+        <div className="animate-pulse text-stone-400">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) return null;
 
   return (
     <div className="pt-[72px] bg-stone-50 min-h-screen">
@@ -78,23 +151,31 @@ export default function Admin() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-light text-stone-900 tracking-tight">Dashboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-display font-medium text-stone-900 tracking-tight">Dashboard</h1>
             <p className="text-[13px] text-stone-400 font-light mt-1">Manage your store</p>
           </div>
-          <Link to="/" className="btn-ghost text-stone-400">
-            View Store
-          </Link>
+          <div className="flex items-center gap-3">
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello! I am the Eclection admin.')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-ghost text-emerald-600 hover:text-emerald-700"
+            >
+              <MessageCircle size={14} /> WhatsApp
+            </a>
+            <Link to="/" className="btn-ghost text-stone-400">View Store</Link>
+          </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {[
-            { icon: DollarSign, label: 'Revenue', value: `$${totalRevenue.toLocaleString()}`, color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
+            { icon: DollarSign, label: 'Revenue', value: format(totalRevenue), color: 'text-emerald-700 bg-emerald-50 border-emerald-100' },
             { icon: ShoppingBag, label: 'Orders', value: totalOrders.toString(), color: 'text-blue-700 bg-blue-50 border-blue-100' },
             { icon: Package, label: 'Pending', value: pendingOrders.toString(), color: 'text-amber-700 bg-amber-50 border-amber-100' },
-            { icon: TrendingUp, label: 'Avg. Order', value: `$${avgOrderValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, color: 'text-teal-700 bg-teal-50 border-teal-100' },
+            { icon: TrendingUp, label: 'Avg. Order', value: format(avgOrderValue), color: 'text-teal-700 bg-teal-50 border-teal-100' },
           ].map((stat) => (
-            <div key={stat.label} className={`bg-white p-5 border ${stat.color.split(' ').slice(2).join(' ')} rounded-lg`}>
+            <div key={stat.label} className={`bg-white p-5 border ${stat.color.split(' ').slice(2).join(' ')} rounded-xl`}>
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${stat.color.split(' ').slice(0, 2).join(' ')}`}>
                   <stat.icon size={18} />
@@ -109,12 +190,12 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 bg-white border border-stone-200 p-1 rounded-lg w-fit">
-          {(['products', 'orders', 'summary'] as Tab[]).map((t) => (
+        <div className="flex gap-1 mb-6 bg-white border border-stone-200 p-1 rounded-xl w-fit">
+          {(['overview', 'products', 'orders', 'customers'] as Tab[]).map((t) => (
             <button
               key={t}
-              onClick={() => setTab(t)}
-              className={`px-5 py-2.5 text-[11px] tracking-[0.1em] uppercase font-semibold rounded-md transition-all duration-200 ${
+              onClick={() => { setTab(t); setSearchQuery(''); }}
+              className={`px-5 py-2.5 text-[11px] tracking-[0.1em] uppercase font-semibold rounded-lg transition-all duration-200 ${
                 tab === t ? 'bg-stone-900 text-white shadow-sm' : 'text-stone-400 hover:text-stone-700'
               }`}
             >
@@ -123,20 +204,108 @@ export default function Admin() {
           ))}
         </div>
 
+        {/* ── Overview Tab ── */}
+        {tab === 'overview' && (
+          <div className="space-y-5">
+            <div className="grid md:grid-cols-2 gap-5">
+              <div className="bg-white border border-stone-200 rounded-xl p-6 sm:p-8">
+                <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Revenue by Status</h3>
+                {['pending', 'processing', 'shipped', 'delivered'].map((status) => {
+                  const statusOrders = orders.filter((o) => o.status === status);
+                  const statusRevenue = statusOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+                  const pct = totalRevenue > 0 ? (statusRevenue / totalRevenue) * 100 : 0;
+                  return (
+                    <div key={status} className="mb-5 last:mb-0">
+                      <div className="flex justify-between text-[13px] mb-1.5">
+                        <span className="text-stone-600 font-light capitalize">{status}</span>
+                        <span className="text-stone-900 font-medium">{format(statusRevenue)}</span>
+                      </div>
+                      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-700 ${STATUS_BAR[status] || 'bg-stone-400'}`} style={{ width: `${Math.max(pct, 2)}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="bg-white border border-stone-200 rounded-xl p-6 sm:p-8">
+                <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Recent Orders</h3>
+                {orders.length === 0 ? (
+                  <p className="text-[13px] text-stone-400 font-light">No orders yet.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {orders.slice(0, 5).map((order) => (
+                      <div key={order.id} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[13px] text-stone-900 font-medium">{order.full_name || 'Customer'}</p>
+                          <p className="text-[11px] text-stone-400">{new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[13px] text-stone-900 font-medium">{format(Number(order.total) || 0)}</p>
+                          <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_COLORS[order.status] || 'bg-stone-50 text-stone-600 border-stone-200'}`}>{order.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-white border border-stone-200 rounded-xl p-6 sm:p-8">
+              <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Top Products</h3>
+              <div className="space-y-3">
+                {products.slice(0, 5).map((product, i) => (
+                  <div key={product.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] text-stone-400 font-medium w-5">{i + 1}</span>
+                      <div className="w-8 h-10 bg-stone-50 overflow-hidden rounded">
+                        <img src={product.image_url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-[13px] text-stone-900 font-medium">{product.name}</span>
+                    </div>
+                    <span className="text-[13px] text-stone-600 font-light">{format(product.price)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'Total Products', value: products.length.toString(), icon: Package },
+                { label: 'In Stock', value: products.filter((p) => p.in_stock).length.toString(), icon: Package },
+                { label: 'Featured', value: products.filter((p) => p.featured).length.toString(), icon: BarChart3 },
+                { label: 'Customers', value: customers.length.toString(), icon: Users },
+              ].map((s) => (
+                <div key={s.label} className="bg-white border border-stone-200 rounded-xl p-5 text-center">
+                  <s.icon size={18} className="mx-auto text-stone-400 mb-2" />
+                  <p className="text-lg font-medium text-stone-900">{s.value}</p>
+                  <p className="text-[10px] text-stone-400 font-semibold tracking-[0.1em] uppercase mt-1">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Products Tab ── */}
         {tab === 'products' && (
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-[13px] text-stone-400 font-light">{products.length} products</p>
-              <button
-                onClick={() => { setEditingProduct(null); setShowForm(true); }}
-                className="btn-primary py-2.5 px-5"
-              >
+            <div className="flex items-center justify-between mb-5 gap-4">
+              <div className="relative flex-1 max-w-sm">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input-field pl-9 py-2.5"
+                />
+              </div>
+              <button onClick={() => { setEditingProduct(null); setShowForm(true); }} className="btn-primary py-2.5 px-5">
                 <Plus size={14} /> Add Product
               </button>
             </div>
 
-            <div className="bg-white border border-stone-200 rounded-lg overflow-hidden">
+            <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -149,7 +318,7 @@ export default function Admin() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-50">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <tr key={product.id} className="hover:bg-stone-50/30 transition-colors">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
@@ -160,26 +329,21 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="px-5 py-4 text-[13px] text-stone-500 font-light capitalize hidden sm:table-cell">{product.category}</td>
-                        <td className="px-5 py-4 text-[13px] text-stone-900 font-medium">${product.price.toLocaleString()}</td>
+                        <td className="px-5 py-4 text-[13px] text-stone-900 font-medium">{format(product.price)}</td>
                         <td className="px-5 py-4 hidden md:table-cell">
-                          <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${
-                            product.in_stock ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'
-                          }`}>
+                          <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${product.in_stock ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'}`}>
                             {product.in_stock ? 'In Stock' : 'Sold Out'}
                           </span>
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() => { setEditingProduct(product); setShowForm(true); }}
-                              className="p-2 text-stone-400 hover:text-stone-900 transition-colors rounded hover:bg-stone-100"
-                            >
+                            <Link to={`/product/${product.id}`} className="p-2 text-stone-400 hover:text-stone-900 transition-colors rounded hover:bg-stone-100">
+                              <Eye size={14} />
+                            </Link>
+                            <button onClick={() => { setEditingProduct(product); setShowForm(true); }} className="p-2 text-stone-400 hover:text-stone-900 transition-colors rounded hover:bg-stone-100">
                               <Pencil size={14} />
                             </button>
-                            <button
-                              onClick={() => deleteProduct(product.id)}
-                              className="p-2 text-stone-400 hover:text-red-600 transition-colors rounded hover:bg-red-50"
-                            >
+                            <button onClick={() => deleteProduct(product.id)} className="p-2 text-stone-400 hover:text-red-600 transition-colors rounded hover:bg-red-50">
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -204,22 +368,50 @@ export default function Admin() {
         {/* ── Orders Tab ── */}
         {tab === 'orders' && (
           <div>
-            <p className="text-[13px] text-stone-400 font-light mb-5">{orders.length} orders</p>
+            <div className="flex items-center gap-4 mb-5 flex-wrap">
+              <div className="relative flex-1 max-w-sm">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input-field pl-9 py-2.5"
+                />
+              </div>
+              <div className="relative">
+                <select
+                  value={orderFilter}
+                  onChange={(e) => setOrderFilter(e.target.value)}
+                  className="input-field py-2.5 pr-8 bg-white appearance-none"
+                >
+                  <option value="all">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none" />
+              </div>
+            </div>
+
+            <p className="text-[13px] text-stone-400 font-light mb-4">{filteredOrders.length} orders</p>
+
             {loading ? (
               <div className="animate-pulse space-y-3">
                 {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-white border border-stone-200 h-24 rounded-lg" />
+                  <div key={i} className="bg-white border border-stone-200 h-24 rounded-xl" />
                 ))}
               </div>
-            ) : orders.length === 0 ? (
-              <div className="bg-white border border-stone-200 rounded-lg p-16 text-center">
+            ) : filteredOrders.length === 0 ? (
+              <div className="bg-white border border-stone-200 rounded-xl p-16 text-center">
                 <ShoppingBag size={32} className="mx-auto text-stone-300 mb-4" />
-                <p className="text-stone-400 font-light">No orders yet.</p>
+                <p className="text-stone-400 font-light">No orders found.</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {orders.map((order) => (
-                  <div key={order.id} className="bg-white border border-stone-200 rounded-lg p-5 sm:p-6">
+                {filteredOrders.map((order) => (
+                  <div key={order.id} className="bg-white border border-stone-200 rounded-xl p-5 sm:p-6">
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -236,24 +428,32 @@ export default function Admin() {
                           <div className="mt-3 pt-3 border-t border-stone-100 space-y-1">
                             {order.items.map((item) => (
                               <p key={item.id} className="text-[12px] text-stone-500 font-light">
-                                {item.product_name} &middot; Qty {item.quantity} &middot; ${item.price}
+                                {item.product_name} &middot; Qty {item.quantity} &middot; {format(item.price)}
                               </p>
                             ))}
                           </div>
                         )}
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <p className="text-[15px] font-medium text-stone-900">${(order.total || 0).toLocaleString()}</p>
+                        <p className="text-[15px] font-medium text-stone-900">{format(Number(order.total) || 0)}</p>
                         <select
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                          className="mt-2 text-[11px] border border-stone-200 px-2.5 py-1.5 rounded bg-white focus:outline-none focus:border-stone-400"
+                          className="mt-2 text-[11px] border border-stone-200 px-2.5 py-1.5 rounded-lg bg-white focus:outline-none focus:border-stone-400"
                         >
                           <option value="pending">Pending</option>
                           <option value="processing">Processing</option>
                           <option value="shipped">Shipped</option>
                           <option value="delivered">Delivered</option>
                         </select>
+                        <a
+                          href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello ${order.full_name}, regarding your order #${order.id.slice(0, 8)}...`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 flex items-center justify-center gap-1 text-[10px] text-emerald-600 hover:text-emerald-700 transition-colors"
+                        >
+                          <MessageCircle size={12} /> WhatsApp
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -263,96 +463,88 @@ export default function Admin() {
           </div>
         )}
 
-        {/* ── Summary Tab ── */}
-        {tab === 'summary' && (
-          <div className="space-y-5">
-            <div className="grid md:grid-cols-2 gap-5">
-              {/* Revenue by Status */}
-              <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8">
-                <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Revenue by Status</h3>
-                {['pending', 'processing', 'shipped', 'delivered'].map((status) => {
-                  const statusOrders = orders.filter((o) => o.status === status);
-                  const statusRevenue = statusOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-                  const pct = totalRevenue > 0 ? (statusRevenue / totalRevenue) * 100 : 0;
-                  return (
-                    <div key={status} className="mb-5 last:mb-0">
-                      <div className="flex justify-between text-[13px] mb-1.5">
-                        <span className="text-stone-600 font-light capitalize">{status}</span>
-                        <span className="text-stone-900 font-medium">${statusRevenue.toLocaleString()}</span>
-                      </div>
-                      <div className="h-2 bg-stone-100 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-700 ${STATUS_BAR[status] || 'bg-stone-400'}`}
-                          style={{ width: `${Math.max(pct, 2)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Recent Orders */}
-              <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8">
-                <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Recent Orders</h3>
-                {orders.length === 0 ? (
-                  <p className="text-[13px] text-stone-400 font-light">No orders yet.</p>
-                ) : (
-                  <div className="space-y-4">
-                    {orders.slice(0, 5).map((order) => (
-                      <div key={order.id} className="flex items-center justify-between">
-                        <div>
-                          <p className="text-[13px] text-stone-900 font-medium">{order.full_name || 'Customer'}</p>
-                          <p className="text-[11px] text-stone-400">
-                            {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[13px] text-stone-900 font-medium">${(order.total || 0).toLocaleString()}</p>
-                          <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full border ${STATUS_COLORS[order.status] || 'bg-stone-50 text-stone-600 border-stone-200'}`}>
-                            {order.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+        {/* ── Customers Tab ── */}
+        {tab === 'customers' && (
+          <div>
+            <div className="flex items-center gap-4 mb-5">
+              <div className="relative flex-1 max-w-sm">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Search customers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input-field pl-9 py-2.5"
+                />
               </div>
             </div>
 
-            {/* Top Products */}
-            <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8">
-              <h3 className="text-[10px] tracking-[0.2em] uppercase text-stone-400 font-semibold mb-6">Top Products</h3>
-              <div className="space-y-3">
-                {products.slice(0, 5).map((product, i) => (
-                  <div key={product.id} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] text-stone-400 font-medium w-5">{i + 1}</span>
-                      <div className="w-8 h-10 bg-stone-50 overflow-hidden rounded">
-                        <img src={product.image_url} alt="" className="w-full h-full object-cover" />
-                      </div>
-                      <span className="text-[13px] text-stone-900 font-medium">{product.name}</span>
-                    </div>
-                    <span className="text-[13px] text-stone-600 font-light">${product.price.toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <p className="text-[13px] text-stone-400 font-light mb-4">{customers.length} customers</p>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { label: 'Total Products', value: products.length.toString(), icon: Package },
-                { label: 'In Stock', value: products.filter((p) => p.in_stock).length.toString(), icon: Package },
-                { label: 'Featured', value: products.filter((p) => p.featured).length.toString(), icon: BarChart3 },
-                { label: 'Delivered', value: deliveredOrders.toString(), icon: ShoppingBag },
-              ].map((s) => (
-                <div key={s.label} className="bg-white border border-stone-200 rounded-lg p-5 text-center">
-                  <s.icon size={18} className="mx-auto text-stone-400 mb-2" />
-                  <p className="text-lg font-medium text-stone-900">{s.value}</p>
-                  <p className="text-[10px] text-stone-400 font-semibold tracking-[0.1em] uppercase mt-1">{s.label}</p>
+            {customers.length === 0 ? (
+              <div className="bg-white border border-stone-200 rounded-xl p-16 text-center">
+                <Users size={32} className="mx-auto text-stone-300 mb-4" />
+                <p className="text-stone-400 font-light">No customers yet.</p>
+              </div>
+            ) : (
+              <div className="bg-white border border-stone-200 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-stone-100 bg-stone-50/50">
+                        <th className="text-left text-[10px] tracking-[0.12em] uppercase text-stone-400 font-semibold px-5 py-3">Customer</th>
+                        <th className="text-left text-[10px] tracking-[0.12em] uppercase text-stone-400 font-semibold px-5 py-3 hidden sm:table-cell">Orders</th>
+                        <th className="text-left text-[10px] tracking-[0.12em] uppercase text-stone-400 font-semibold px-5 py-3">Total Spent</th>
+                        <th className="text-left text-[10px] tracking-[0.12em] uppercase text-stone-400 font-semibold px-5 py-3 hidden md:table-cell">Last Order</th>
+                        <th className="text-right text-[10px] tracking-[0.12em] uppercase text-stone-400 font-semibold px-5 py-3">Contact</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stone-50">
+                      {customers
+                        .filter((c) => !searchQuery || c.name.toLowerCase().includes(searchQuery.toLowerCase()) || c.email.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .map((customer) => (
+                        <tr key={customer.email} className="hover:bg-stone-50/30 transition-colors">
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 bg-stone-100 rounded-full flex items-center justify-center text-[12px] font-semibold text-stone-500">
+                                {customer.name?.charAt(0)?.toUpperCase() || '?'}
+                              </div>
+                              <div>
+                                <p className="text-[13px] text-stone-900 font-medium">{customer.name}</p>
+                                <p className="text-[11px] text-stone-400">{customer.email}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4 text-[13px] text-stone-600 font-light hidden sm:table-cell">{customer.orders}</td>
+                          <td className="px-5 py-4 text-[13px] text-stone-900 font-medium">{format(customer.total)}</td>
+                          <td className="px-5 py-4 text-[13px] text-stone-400 font-light hidden md:table-cell">
+                            {new Date(customer.lastOrder).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </td>
+                          <td className="px-5 py-4">
+                            <div className="flex items-center justify-end gap-1">
+                              <a
+                                href={`mailto:${customer.email}`}
+                                className="p-2 text-stone-400 hover:text-stone-900 transition-colors rounded hover:bg-stone-100"
+                              >
+                                <DollarSign size={14} />
+                              </a>
+                              <a
+                                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`Hello ${customer.name},`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-emerald-500 hover:text-emerald-700 transition-colors rounded hover:bg-emerald-50"
+                              >
+                                <MessageCircle size={14} />
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -415,8 +607,8 @@ function ProductForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-      <div className="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl animate-scale-in">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 sticky top-0 bg-white z-10">
+      <div className="bg-white w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl animate-scale-in">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 sticky top-0 bg-white z-10 rounded-t-xl">
           <h2 className="text-[11px] tracking-[0.15em] uppercase font-semibold text-stone-900">
             {product ? 'Edit Product' : 'Add Product'}
           </h2>
@@ -436,7 +628,7 @@ function ProductForm({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1.5 font-semibold">Price</label>
+              <label className="block text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1.5 font-semibold">Price (NGN)</label>
               <input type="number" step="0.01" required value={form.price} onChange={(e) => update('price', e.target.value)} className="input-field" />
             </div>
             <div>
@@ -466,11 +658,11 @@ function ProductForm({
           </div>
           <div className="flex items-center gap-6 pt-1">
             <label className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" checked={form.in_stock} onChange={(e) => update('in_stock', e.target.checked)} className="w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-400" />
+              <input type="checkbox" checked={form.in_stock as boolean} onChange={(e) => update('in_stock', e.target.checked)} className="w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-400" />
               <span className="text-[13px] text-stone-600 font-light">In Stock</span>
             </label>
             <label className="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" checked={form.featured} onChange={(e) => update('featured', e.target.checked)} className="w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-400" />
+              <input type="checkbox" checked={form.featured as boolean} onChange={(e) => update('featured', e.target.checked)} className="w-4 h-4 rounded border-stone-300 text-stone-900 focus:ring-stone-400" />
               <span className="text-[13px] text-stone-600 font-light">Featured</span>
             </label>
           </div>
@@ -478,9 +670,7 @@ function ProductForm({
             <button type="submit" disabled={saving} className="btn-primary flex-1 disabled:opacity-50">
               {saving ? 'Saving...' : product ? 'Update Product' : 'Add Product'}
             </button>
-            <button type="button" onClick={onClose} className="btn-outline flex-shrink-0">
-              Cancel
-            </button>
+            <button type="button" onClick={onClose} className="btn-outline flex-shrink-0">Cancel</button>
           </div>
         </form>
       </div>

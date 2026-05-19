@@ -50,7 +50,6 @@ export default function Shop() {
 
   return (
     <div className="pt-[72px]">
-      {/* Hero */}
       <section className="relative h-[35vh] sm:h-[40vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -60,12 +59,11 @@ export default function Shop() {
         </div>
         <div className="relative z-10 text-center animate-fade-in">
           <p className="section-label text-stone-300 mb-3">Collections</p>
-          <h1 className="text-4xl sm:text-5xl font-extralight text-white tracking-tight">Shop</h1>
+          <h1 className="text-4xl sm:text-5xl font-display font-medium text-white tracking-tight">Shop</h1>
         </div>
       </section>
 
       <div className="max-w-[1400px] mx-auto px-5 sm:px-8 py-10 sm:py-14">
-        {/* Toolbar */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <button
@@ -90,7 +88,6 @@ export default function Shop() {
         </div>
 
         <div className="flex gap-10">
-          {/* Sidebar */}
           <aside
             className={`${
               showFilters
@@ -123,7 +120,6 @@ export default function Shop() {
             </div>
           </aside>
 
-          {/* Grid */}
           <div className="flex-1 min-w-0">
             {loading ? (
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
@@ -138,10 +134,7 @@ export default function Shop() {
             ) : sorted.length === 0 ? (
               <div className="text-center py-24">
                 <p className="text-stone-400 font-light">No products found in this category.</p>
-                <button
-                  onClick={() => setCategory('All')}
-                  className="mt-4 text-[11px] tracking-[0.12em] uppercase font-semibold text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-600 transition-colors"
-                >
+                <button onClick={() => setCategory('All')} className="mt-4 text-[11px] tracking-[0.12em] uppercase font-semibold text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-600 transition-colors">
                   View All Products
                 </button>
               </div>

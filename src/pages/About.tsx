@@ -1,7 +1,6 @@
 export default function About() {
   return (
     <div className="pt-[72px]">
-      {/* Hero */}
       <section className="relative h-[45vh] sm:h-[50vh] flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -11,11 +10,10 @@ export default function About() {
         </div>
         <div className="relative z-10 text-center animate-fade-in">
           <p className="section-label text-stone-300 mb-3">Our Story</p>
-          <h1 className="text-4xl sm:text-5xl font-extralight text-white tracking-tight">About Eclection</h1>
+          <h1 className="text-4xl sm:text-5xl font-display font-medium text-white tracking-tight">About Eclection</h1>
         </div>
       </section>
 
-      {/* Story */}
       <section className="py-24 sm:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -24,7 +22,7 @@ export default function About() {
               <h2 className="section-title">
                 A vision born
                 <br />
-                <span className="italic font-extralight">from passion</span>
+                <span className="italic font-display font-normal">from passion</span>
               </h2>
               <p className="mt-7 text-stone-500 font-light leading-[1.8] text-[15px]">
                 Eclection was born from a simple belief: that exceptional fashion should be accessible to those who
@@ -50,7 +48,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Values */}
       <section className="py-24 sm:py-32 bg-stone-50">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="text-center mb-14">
@@ -59,25 +56,13 @@ export default function About() {
           </div>
           <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
             {[
-              {
-                title: 'Craftsmanship',
-                description:
-                  'We partner exclusively with artisans and ateliers who share our commitment to excellence. Every stitch, every seam, every detail reflects generations of skill and dedication.',
-              },
-              {
-                title: 'Sustainability',
-                description:
-                  'Luxury and responsibility go hand in hand. We prioritize sustainable materials, ethical production, and timeless design that transcends disposable fashion.',
-              },
-              {
-                title: 'Individuality',
-                description:
-                  'We curate for the individual, not the masses. Our collections are designed for those who define their own style rather than follow the crowd.',
-              },
+              { title: 'Craftsmanship', description: 'We partner exclusively with artisans and ateliers who share our commitment to excellence. Every stitch, every seam, every detail reflects generations of skill and dedication.' },
+              { title: 'Sustainability', description: 'Luxury and responsibility go hand in hand. We prioritize sustainable materials, ethical production, and timeless design that transcends disposable fashion.' },
+              { title: 'Individuality', description: 'We curate for the individual, not the masses. Our collections are designed for those who define their own style rather than follow the crowd.' },
             ].map((value) => (
               <div key={value.title} className="bg-white p-8 sm:p-10 card-hover">
                 <div className="w-10 h-10 bg-stone-50 flex items-center justify-center mb-5">
-                  <span className="text-brand-600 text-lg font-light">{value.title[0]}</span>
+                  <span className="text-brand-600 text-lg font-display">{value.title[0]}</span>
                 </div>
                 <h3 className="text-lg font-medium text-stone-900 tracking-tight mb-4">{value.title}</h3>
                 <p className="text-stone-500 font-light leading-[1.8] text-[15px]">{value.description}</p>
@@ -87,7 +72,6 @@ export default function About() {
         </div>
       </section>
 
-      {/* Team */}
       <section className="py-24 sm:py-32 bg-white">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="text-center mb-14">
@@ -102,12 +86,7 @@ export default function About() {
             ].map((person) => (
               <div key={person.name} className="text-center group">
                 <div className="w-40 h-40 sm:w-48 sm:h-48 mx-auto overflow-hidden bg-stone-50">
-                  <img
-                    src={person.img}
-                    alt={person.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
+                  <img src={person.img} alt={person.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" loading="lazy" />
                 </div>
                 <h3 className="mt-6 text-sm font-medium text-stone-900">{person.name}</h3>
                 <p className="text-[11px] text-stone-400 mt-1.5 tracking-[0.1em] uppercase">{person.role}</p>
