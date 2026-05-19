@@ -36,7 +36,7 @@ interface CustomerInfo {
 }
 
 export default function Admin() {
-  const { isAdmin, loading: authLoading } = useAuth();
+  const { isAdmin, loading: authLoading, user } = useAuth();
   const { format } = useCurrency();
   const navigate = useNavigate();
 
@@ -51,12 +51,16 @@ export default function Admin() {
   const [orderFilter, setOrderFilter] = useState('all');
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      navigate('/login');
+    if (authLoading) return;
+    if (!user) {
+      navigate('/login', { replace: true, state: { from: '/admin' } });
+    } else if (!isAdmin) {
+      navigate('/', { replace: true });
     }
-  }, [isAdmin, authLoading, navigate]);
+  }, [isAdmin, authLoading, user, navigate]);
 
   useEffect(() => {
+    if (!isAdmin) return;
     fetchProducts();
     fetchOrders();
   }, []);

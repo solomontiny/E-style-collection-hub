@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -9,8 +9,17 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, isAdmin, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string })?.from || '/';
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, authLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,10 +29,12 @@ export default function Login() {
     if (error) {
       setError(error === 'Invalid login credentials' ? 'Invalid email or password.' : error);
       setLoading(false);
-    } else {
-      navigate('/');
     }
+    // Navigation handled by the useEffect above when user state updates
   };
+
+  // Don't render login form if already authenticated
+  if (!authLoading && user) return null;
 
   return (
     <div className="pt-[72px] min-h-screen bg-white flex items-center">

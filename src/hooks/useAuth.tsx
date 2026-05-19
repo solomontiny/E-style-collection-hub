@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -29,14 +29,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-    setProfile(data as Profile | null);
-  };
+  const fetchProfile = useCallback(async (userId: string): Promise<Profile | null> => {
+    // Retry up to 3 times with a small delay (profile may not exist yet due to trigger race)
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      if (data) {
+        setProfile(data as Profile);
+        return data as Profile;
+      }
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 300));
+      }
+    }
+    setProfile(null);
+    return null;
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -59,11 +70,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message || null };
+    if (error) return { error: error.message };
+    // Fetch profile after successful sign-in
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await fetchProfile(session.user.id);
+    }
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -72,7 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: { data: { full_name: fullName } },
     });
-    return { error: error?.message || null };
+    if (error) return { error: error.message };
+    return { error: null };
   };
 
   const signOut = async () => {
