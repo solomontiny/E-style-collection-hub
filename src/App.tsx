@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
-import { MessageCircle } from 'lucide-react';
 import { CartProvider } from './hooks/useCart';
 import { CurrencyProvider } from './hooks/useCurrency';
 import { AuthProvider } from './hooks/useAuth';
@@ -14,8 +13,8 @@ import Checkout from './pages/Checkout';
 import Admin from './pages/Admin';
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-const WHATSAPP_NUMBER = '2348081759542';
+import ResetPassword from './pages/ResetPassword';
+import AIChatBot from './components/AIChatBot';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -25,21 +24,10 @@ function ScrollToTop() {
   return null;
 }
 
-function WhatsAppButton() {
+function ChatBotWidget() {
   const { pathname } = useLocation();
   if (pathname === '/admin' || pathname === '/login' || pathname === '/register') return null;
-
-  return (
-    <a
-      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Eclection! I would like to inquire about your products.')}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="fixed bottom-6 right-6 z-40 w-14 h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/30 transition-all duration-300 hover:scale-110 animate-fade-in"
-      aria-label="Chat on WhatsApp"
-    >
-      <MessageCircle size={24} />
-    </a>
-  );
+  return <AIChatBot />;
 }
 
 function App() {
@@ -61,9 +49,10 @@ function App() {
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                 </Route>
               </Routes>
-              <WhatsAppButton />
+              <ChatBotWidget />
             </div>
           </CartProvider>
         </CurrencyProvider>
