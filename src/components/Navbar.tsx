@@ -4,6 +4,7 @@ import { ShoppingBag, Menu, X, User, ChevronDown } from 'lucide-react';
 import { useCart } from '../hooks/useCart';
 import { useAuth } from '../hooks/useAuth';
 import { useCurrency } from '../hooks/useCurrency';
+import Logo from './Logo';
 import type { CurrencyCode } from '../hooks/useCurrency';
 
 const NAV_LINKS = [
@@ -49,8 +50,8 @@ export default function Navbar() {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${bgColor}`}>
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="flex items-center justify-between h-[72px]">
-            <Link to="/" className={`text-xl sm:text-2xl font-display font-medium tracking-[0.2em] uppercase ${textColor} transition-colors duration-300`}>
-              Eclection
+            <Link to="/" className="transition-opacity duration-300 hover:opacity-80">
+              <Logo textColor={textColor} />
             </Link>
 
             <nav className="hidden lg:flex items-center gap-10">

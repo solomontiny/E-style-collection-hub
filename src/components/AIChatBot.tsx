@@ -140,7 +140,7 @@ export default function AIChatBot() {
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-gradient-to-br from-stone-900 to-stone-800 hover:shadow-xl text-white rounded-full flex items-center justify-center shadow-lg shadow-stone-900/40 transition-all duration-300 hover:scale-110 animate-bounce"
+        className="fixed bottom-6 right-6 z-40 w-16 h-16 bg-gradient-to-br from-amber-700 to-amber-600 hover:shadow-xl text-white rounded-full flex items-center justify-center shadow-lg shadow-amber-700/40 transition-all duration-300 hover:scale-110 animate-bounce"
         aria-label="Open AI Chat"
         title="E-Style AI Concierge"
       >
@@ -155,7 +155,7 @@ export default function AIChatBot() {
       className={`fixed bottom-6 right-6 z-50 w-full max-w-sm h-[600px] ${bgClass} rounded-2xl shadow-2xl flex flex-col border border-stone-200 ${isDark ? 'border-stone-700' : ''} overflow-hidden animate-scale-in`}
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-stone-900 to-stone-800 text-white px-5 py-4 flex items-center justify-between flex-shrink-0">
+      <div className="bg-gradient-to-r from-amber-700 to-amber-600 text-white px-5 py-4 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <MessageCircle size={20} />
@@ -204,7 +204,7 @@ export default function AIChatBot() {
                 <div
                   className={`max-w-[70%] px-4 py-2.5 rounded-xl text-[13px] leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-stone-900 text-white rounded-br-sm'
+                      ? 'bg-amber-700 text-white rounded-br-sm'
                       : `${messageBotBgClass} ${textClass} rounded-bl-sm border border-stone-300 ${isDark ? 'border-stone-600' : ''}`
                   }`}
                 >
@@ -266,7 +266,7 @@ export default function AIChatBot() {
             <button
               type="submit"
               disabled={!input.trim() || loading}
-              className="w-10 h-10 bg-stone-900 text-white rounded-lg flex items-center justify-center hover:bg-stone-800 transition-colors disabled:opacity-40 flex-shrink-0"
+              className="w-10 h-10 bg-amber-700 text-white rounded-lg flex items-center justify-center hover:bg-amber-800 transition-colors disabled:opacity-40 flex-shrink-0"
               aria-label="Send"
             >
               {loading ? <Loader size={16} className="animate-spin" /> : <Send size={16} />}

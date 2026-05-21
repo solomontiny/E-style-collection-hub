@@ -13,6 +13,7 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
   }
 
   body {
@@ -20,12 +21,21 @@
   }
 
   ::selection {
-    @apply bg-stone-900 text-white;
+    @apply bg-amber-700 text-white;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply text-stone-900;
   }
+}
+
+@layer utilities {
+  .text-gold-500 { @apply text-amber-500; }
+  .text-gold-600 { @apply text-amber-600; }
+  .bg-gold-50 { @apply bg-amber-50; }
+  .bg-gold-100 { @apply bg-amber-100; }
+  .border-gold-500 { @apply border-amber-500; }
+  .hover-gold { @apply hover:text-amber-600 hover:border-amber-600; }
 }
 
 @layer components {
@@ -34,11 +44,11 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 bg-stone-900 text-white px-8 py-3.5 text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 hover:bg-stone-700 active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 bg-amber-700 text-white px-8 py-3.5 text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 hover:bg-amber-800 active:scale-[0.98];
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 border border-stone-900 text-stone-900 px-8 py-3.5 text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 hover:bg-stone-900 hover:text-white active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 border border-stone-900 text-stone-900 px-8 py-3.5 text-[11px] tracking-[0.2em] uppercase font-medium transition-all duration-300 hover:bg-amber-700 hover:text-white hover:border-amber-700 active:scale-[0.98];
   }
 
   .btn-ghost {

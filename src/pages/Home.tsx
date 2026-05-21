@@ -30,30 +30,30 @@ export default function Home() {
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center scale-105"
-          style={{ backgroundImage: `url('https://images.pexels.com/photos/336372/pexels-photo-336372.jpeg?auto=compress&cs=tinysrgb&w=1920')` }}
+          style={{ backgroundImage: `url('https://images.pexels.com/photos/3622627/pexels-photo-3622627.jpeg?auto=compress&cs=tinysrgb&w=1920')` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/60 via-stone-950/40 to-stone-950/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
         </div>
         <div className="relative z-10 text-center px-5 max-w-3xl animate-fade-in">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <Sparkles size={14} className="text-brand-400" />
-            <p className="section-label text-stone-300">Autumn / Winter 2025</p>
-            <Sparkles size={14} className="text-brand-400" />
+            <Sparkles size={14} className="text-amber-400" />
+            <p className="section-label text-amber-200">Affordable Fashion for Everyone</p>
+            <Sparkles size={14} className="text-amber-400" />
           </div>
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-medium text-white tracking-tight leading-[1.05]">
-            The Art of
+            E Style
             <br />
-            <span className="italic font-normal">Refined</span> Style
+            <span className="italic font-normal">Collection</span>
           </h1>
-          <p className="mt-7 text-stone-300 font-light text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
-            Discover curated collections that transcend seasons. Where craftsmanship meets contemporary elegance.
+          <p className="mt-7 text-stone-100 font-light text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
+            Premium fashion for women & men. Elegance meets affordability. Discover timeless style that fits your life.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <Link to="/shop" className="btn-primary bg-white text-stone-950 hover:bg-stone-100">
-              Explore Collection <ArrowRight size={13} />
+            <Link to="/shop" className="btn-primary bg-amber-500 text-white hover:bg-amber-600">
+              Shop Now <ArrowRight size={13} />
             </Link>
-            <Link to="/about" className="btn-outline border-white/30 text-white hover:bg-white hover:text-stone-950">
-              Our Story
+            <Link to="/about" className="btn-outline border-white/30 text-white hover:bg-amber-600 hover:text-white hover:border-amber-600">
+              Learn More
             </Link>
           </div>
         </div>
