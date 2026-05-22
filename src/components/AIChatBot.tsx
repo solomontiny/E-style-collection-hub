@@ -1,40 +1,57 @@
-const handleSendMessage = async (text?: string) => {
-  const messageText = text || input.trim();
-  if (!messageText || loading) return;
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
-  setInput('');
-  addMessage('user', messageText);
-  setLoading(true);
+export default function AIChatBot() {
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
 
-  try {
-    const { data, error } = await supabase.functions.invoke('chat', {
-      body: { message: messageText },
-    });
+  const addMessage = (role: string, content: string) => {
+    setMessages((prev) => [...prev, { role, content }]);
+  };
 
-    // 🔍 DEBUG LOG (IMPORTANT)
-    console.log(
-      'SUPABASE FULL RESPONSE:',
-      JSON.stringify({ data, error }, null, 2)
-    );
+  const handleSendMessage = async (text?: string) => {
+    const messageText = text || input.trim();
+    if (!messageText || loading) return;
 
-    if (error) throw error;
+    setInput('');
+    addMessage('user', messageText);
+    setLoading(true);
 
-    const botResponse =
-      data?.reply ??
-      data?.response ??
-      data?.data?.reply ??
-      "I'm having trouble responding. Please try again.";
+    try {
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: { message: messageText },
+      });
 
-    addMessage('bot', botResponse);
-  } catch (err) {
-    // 🔍 FULL ERROR DEBUG (IMPORTANT)
-    console.error('CHAT ERROR FULL:', err);
+      console.log('SUPABASE RESPONSE:', { data, error });
 
-    addMessage(
-      'bot',
-      'Sorry, I encountered an error. Please try again or contact support on WhatsApp.'
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+      if (error) {
+        console.warn('SUPABASE ERROR:', error);
+      }
+
+      const botResponse =
+        data?.reply ||
+        data?.response ||
+        data?.data?.reply ||
+        error?.message ||
+        "I'm having trouble responding. Please try again.";
+
+      addMessage('bot', botResponse);
+    } catch (err) {
+      console.error('CHAT FUNCTION FAILED:', err);
+
+      addMessage(
+        'bot',
+        'Sorry, I encountered an error. Please try again or contact support on WhatsApp.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      {/* YOUR CHAT UI GOES HERE */}
+    </div>
+  );
+}
