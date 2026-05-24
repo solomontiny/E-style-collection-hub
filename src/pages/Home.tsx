@@ -12,84 +12,79 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase
-      .from('products')
-      .select('*')
-      .eq('featured', true)
-      .eq('in_stock', true)
-      .limit(8)
-      .then(({ data }) => {
+    const fetchProducts = async () => {
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .limit(8);
+
+      if (error) {
+        console.log('Supabase error:', error);
+        setFeatured([]);
+      } else {
         setFeatured(data || []);
-        setLoading(false);
-      });
+      }
+
+      setLoading(false);
+    };
+
+    fetchProducts();
   }, []);
 
   return (
     <div>
-      {/* Hero */}
+      {/* HERO */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center scale-105"
-          style={{ backgroundImage: `url('https://images.pexels.com/photos/3622627/pexels-photo-3622627.jpeg?auto=compress&cs=tinysrgb&w=1920')` }}
+          style={{
+            backgroundImage:
+              "url('https://images.pexels.com/photos/3622627/pexels-photo-3622627.jpeg?auto=compress&cs=tinysrgb&w=1920')",
+          }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
         </div>
+
         <div className="relative z-10 text-center px-5 max-w-3xl animate-fade-in">
           <div className="flex items-center justify-center gap-2 mb-6">
             <Sparkles size={14} className="text-amber-400" />
-            <p className="section-label text-amber-200">Affordable Fashion for Everyone</p>
+            <p className="section-label text-amber-200">
+              Affordable Fashion for Everyone
+            </p>
             <Sparkles size={14} className="text-amber-400" />
           </div>
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-medium text-white tracking-tight leading-[1.05]">
+
+          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-medium text-white leading-[1.05]">
             E Style
             <br />
             <span className="italic font-normal">Collection</span>
           </h1>
-          <p className="mt-7 text-stone-100 font-light text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
-            Premium fashion for women & men. Elegance meets affordability. Discover timeless style that fits your life.
+
+          <p className="mt-7 text-stone-100 font-light text-base sm:text-lg max-w-lg mx-auto">
+            Premium fashion for women & men. Elegance meets affordability.
           </p>
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <Link to="/shop" className="btn-primary bg-amber-500 text-white hover:bg-amber-600">
+            <Link
+              to="/shop"
+              className="btn-primary bg-amber-500 text-white hover:bg-amber-600"
+            >
               Shop Now <ArrowRight size={13} />
             </Link>
-            <Link to="/about" className="btn-outline border-white/30 text-white hover:bg-amber-600 hover:text-white hover:border-amber-600">
+
+            <Link
+              to="/about"
+              className="btn-outline border-white/30 text-white hover:bg-amber-600 hover:border-amber-600"
+            >
               Learn More
             </Link>
           </div>
         </div>
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-fade-in animate-delay-600">
-          <span className="text-[9px] tracking-[0.3em] uppercase text-stone-400 font-medium">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-stone-400 to-transparent" />
-        </div>
       </section>
 
-      {/* Brand Statement */}
-      <section className="py-24 sm:py-32 bg-white">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
-          <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-            <div>
-              <p className="section-label mb-5">Our Philosophy</p>
-              <h2 className="section-title">
-                Fashion that speaks
-                <br />
-                <span className="italic font-display font-normal">without shouting</span>
-              </h2>
-            </div>
-            <div>
-              <p className="text-stone-500 font-light leading-[1.8] text-[15px]">
-                At Eclection, we believe true luxury lies in restraint. Each piece in our collection is selected for its
-                ability to elevate the everyday, combining exceptional materials with timeless design. We curate for
-                those who understand that style is not about following trends — it is about defining them.
-              </p>
-              <Link to="/about" className="inline-flex items-center gap-2 mt-8 text-[11px] tracking-[0.15em] uppercase font-semibold text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-600 hover:border-stone-600 transition-colors">
-                Learn More <ArrowRight size={12} />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products */}
+      {/* FEATURED */}
       <section className="py-24 sm:py-32 bg-stone-50">
         <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
           <div className="flex items-end justify-between mb-14">
@@ -97,140 +92,59 @@ export default function Home() {
               <p className="section-label mb-3">Curated Selection</p>
               <h2 className="section-title">Featured Pieces</h2>
             </div>
-            <Link to="/shop" className="hidden md:flex items-center gap-2 text-[11px] tracking-[0.15em] uppercase font-semibold text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-600 hover:border-stone-600 transition-colors">
+
+            <Link
+              to="/shop"
+              className="hidden md:flex items-center gap-2 text-[11px] uppercase font-semibold border-b border-stone-900 pb-1"
+            >
               View All <ArrowRight size={12} />
             </Link>
           </div>
+
           {loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="bg-stone-200 aspect-[3/4]" />
-                  <div className="mt-4 h-3.5 bg-stone-200 w-3/4 rounded" />
-                  <div className="mt-2 h-3.5 bg-stone-200 w-1/3 rounded" />
+                  <div className="h-3 mt-4 bg-stone-200 w-3/4" />
+                  <div className="h-3 mt-2 bg-stone-200 w-1/2" />
                 </div>
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-              {featured.slice(0, 4).map((product, i) => (
-                <div key={product.id} className="opacity-0 animate-fade-up" style={{ animationDelay: `${i * 100}ms` }}>
-                  <ProductCard product={product} />
-                </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+              {featured.slice(0, 4).map((product) => (
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}
-          <Link to="/shop" className="md:hidden flex items-center justify-center gap-2 mt-10 text-[11px] tracking-[0.15em] uppercase font-semibold text-stone-900 border-b border-stone-900 pb-1 hover:text-stone-600 transition-colors">
-            View All <ArrowRight size={12} />
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24 bg-stone-900 text-center text-white">
+        <h2 className="text-4xl font-display">
+          Experience fashion redefined
+        </h2>
+
+        <div className="mt-10 flex justify-center gap-4 flex-wrap">
+          <Link
+            to="/shop"
+            className="bg-white text-black px-6 py-3 rounded"
+          >
+            Shop Now
           </Link>
-        </div>
-      </section>
 
-      {/* Editorial Banner */}
-      <section className="relative h-[55vh] sm:h-[65vh] flex items-center overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('https://images.pexels.com/photos/291762/pexels-photo-291762.jpeg?auto=compress&cs=tinysrgb&w=1920')` }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-stone-950/80 via-stone-950/50 to-transparent" />
-        </div>
-        <div className="relative z-10 max-w-[1400px] mx-auto px-5 sm:px-8 w-full">
-          <div className="max-w-md">
-            <p className="section-label text-stone-300 mb-4">New Arrival</p>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-white tracking-tight leading-[1.15]">
-              The Cashmere
-              <br />
-              <span className="italic font-normal">Collection</span>
-            </h2>
-            <p className="mt-5 text-stone-300 font-light leading-relaxed text-[15px]">
-              Wrap yourself in the finest cashmere. Sourced from the highlands, crafted for the extraordinary.
-            </p>
-            <Link to="/shop?category=outerwear" className="inline-flex items-center gap-2 mt-8 text-[11px] tracking-[0.15em] uppercase font-semibold text-white border-b border-white pb-1 hover:text-stone-300 hover:border-stone-300 transition-colors">
-              Shop Now <ArrowRight size={12} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Categories */}
-      <section className="py-24 sm:py-32 bg-white">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
-          <div className="text-center mb-14">
-            <p className="section-label mb-3">Browse By</p>
-            <h2 className="section-title">Categories</h2>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {[
-              { name: 'Dresses', img: 'https://images.pexels.com/photos/985635/pexels-photo-985635.jpeg?auto=compress&cs=tinysrgb&w=600', cat: 'dresses' },
-              { name: 'Outerwear', img: 'https://images.pexels.com/photos/1040945/pexels-photo-1040945.jpeg?auto=compress&cs=tinysrgb&w=600', cat: 'outerwear' },
-              { name: 'Bags', img: 'https://images.pexels.com/photos/1152077/pexels-photo-1152077.jpeg?auto=compress&cs=tinysrgb&w=600', cat: 'bags' },
-              { name: 'Shoes', img: 'https://images.pexels.com/photos/2673014/pexels-photo-2673014.jpeg?auto=compress&cs=tinysrgb&w=600', cat: 'shoes' },
-            ].map((cat) => (
-              <Link key={cat.name} to={`/shop?category=${cat.cat}`} className="group relative overflow-hidden aspect-[3/4] card-hover">
-                <img src={cat.img} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]" loading="lazy" />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 via-stone-950/20 to-transparent group-hover:from-stone-950/70 transition-all duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <span className="text-white text-[11px] tracking-[0.25em] uppercase font-semibold">{cat.name}</span>
-                  <div className="w-8 h-px bg-white/50 mt-2 transition-all duration-500 group-hover:w-12" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="py-24 sm:py-32 bg-stone-50">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8">
-          <div className="text-center mb-14">
-            <p className="section-label mb-3">What They Say</p>
-            <h2 className="section-title">Client Voices</h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
-            {[
-              { quote: 'Every piece I have purchased from Eclection has become a cornerstone of my wardrobe. The quality is simply unmatched.', name: 'Isabelle Moreau', title: 'Creative Director' },
-              { quote: 'Shopping here feels like entering another world. The curation is impeccable, and the attention to detail is extraordinary.', name: 'Caroline Ashford', title: 'Architect' },
-              { quote: 'I have never experienced such thoughtful service. The pieces arrive beautifully packaged, and the quality exceeds every expectation.', name: 'Elena Vasquez', title: 'Gallery Owner' },
-            ].map((t) => (
-              <div key={t.name} className="bg-white p-8 sm:p-10 card-hover">
-                <div className="flex gap-1 mb-5">
-                  {[...Array(5)].map((_, i) => (
-                    <span key={i} className="text-brand-500 text-sm">&#9733;</span>
-                  ))}
-                </div>
-                <p className="text-stone-600 font-light leading-[1.8] text-[15px] italic">"{t.quote}"</p>
-                <div className="mt-7 pt-6 border-t border-stone-100">
-                  <p className="text-sm font-medium text-stone-900">{t.name}</p>
-                  <p className="text-[11px] text-stone-400 mt-1 tracking-[0.1em] uppercase">{t.title}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA + WhatsApp */}
-      <section className="py-24 sm:py-32 bg-stone-900">
-        <div className="max-w-[1400px] mx-auto px-5 sm:px-8 text-center">
-          <p className="section-label text-stone-400 mb-4">Join the World of Eclection</p>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-display font-medium text-white tracking-tight leading-[1.15]">
-            Experience fashion
-            <br />
-            <span className="italic font-normal">redefined</span>
-          </h2>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10">
-            <Link to="/shop" className="btn-primary bg-white text-stone-950 hover:bg-stone-100">
-              Shop Now <ArrowRight size={13} />
-            </Link>
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hello Eclection! I would like to inquire about your products.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-outline border-white/30 text-white hover:bg-emerald-600 hover:border-emerald-600"
-            >
-              <MessageCircle size={14} /> Chat on WhatsApp
-            </a>
-          </div>
+          <a
+            href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+              'Hello! I want to inquire about your products.'
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="border border-white px-6 py-3 rounded flex items-center gap-2"
+          >
+            <MessageCircle size={16} /> WhatsApp
+          </a>
         </div>
       </section>
     </div>

@@ -10,10 +10,12 @@ export default function Orders() {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("*, order_items(*)")
+      .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) {
+    if (error) {
+      console.log("Supabase error:", error);
+    } else {
       setOrders(data || []);
     }
 
@@ -21,15 +23,12 @@ export default function Orders() {
   };
 
   useEffect(() => {
-    // initial load
     fetchOrders();
 
-    // auto refresh every 5 seconds
     const interval = setInterval(() => {
       fetchOrders();
     }, 5000);
 
-    // cleanup
     return () => clearInterval(interval);
   }, []);
 
@@ -40,7 +39,9 @@ export default function Orders() {
       .eq("id", id);
 
     if (!error) {
-      fetchOrders(); // refresh immediately after update
+      fetchOrders();
+    } else {
+      console.log("Update error:", error);
     }
   };
 
@@ -54,53 +55,39 @@ export default function Orders() {
 
       <div className="space-y-4">
         {orders.map((order) => (
-          <div
-            key={order.id}
-            className="bg-white p-4 rounded shadow"
-          >
+          <div key={order.id} className="bg-white p-4 rounded shadow">
+            
             {/* ORDER HEADER */}
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-bold">
-                  Order ID: {order.id}
-                </p>
-
+                <p className="font-bold">Order ID: {order.id}</p>
                 <p className="text-sm text-gray-500">
                   Total: ${order.total}
                 </p>
-
                 <p className="text-sm text-gray-500">
                   Status:{" "}
-                  <span className="font-medium">
-                    {order.status}
-                  </span>
+                  <span className="font-medium">{order.status}</span>
                 </p>
               </div>
 
               {/* STATUS ACTIONS */}
               <div className="space-x-2">
                 <button
-                  onClick={() =>
-                    updateStatus(order.id, "pending")
-                  }
+                  onClick={() => updateStatus(order.id, "pending")}
                   className="px-2 py-1 bg-yellow-400 text-white"
                 >
                   Pending
                 </button>
 
                 <button
-                  onClick={() =>
-                    updateStatus(order.id, "shipped")
-                  }
+                  onClick={() => updateStatus(order.id, "shipped")}
                   className="px-2 py-1 bg-blue-500 text-white"
                 >
                   Shipped
                 </button>
 
                 <button
-                  onClick={() =>
-                    updateStatus(order.id, "delivered")
-                  }
+                  onClick={() => updateStatus(order.id, "delivered")}
                   className="px-2 py-1 bg-green-600 text-white"
                 >
                   Delivered
@@ -108,27 +95,13 @@ export default function Orders() {
               </div>
             </div>
 
-            {/* ORDER ITEMS */}
-            {order.order_items?.length > 0 && (
-              <div className="mt-4 border-t pt-3">
-                <p className="text-sm font-semibold mb-2">
-                  Items:
-                </p>
+            {/* ORDER ITEMS (DISABLED FOR NOW) */}
+            <div className="mt-4 border-t pt-3">
+              <p className="text-sm text-gray-400 italic">
+                Order items view disabled (table not set up yet)
+              </p>
+            </div>
 
-                <div className="space-y-1">
-                  {order.order_items.map(
-                    (item: any, index: number) => (
-                      <div
-                        key={index}
-                        className="text-sm text-gray-600"
-                      >
-                        • {item.product_name} × {item.quantity} — ${item.price}
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-            )}
           </div>
         ))}
       </div>
