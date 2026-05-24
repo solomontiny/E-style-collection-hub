@@ -1,5 +1,3 @@
-import ProductsAdmin from "./pages/admin/ProductsAdmin";
-<Route path="/admin/products" element={<ProductsAdmin />} />
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 
@@ -22,7 +20,7 @@ import ResetPassword from './pages/ResetPassword';
 
 import AdminLayout from './layouts/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
-import Products from './pages/admin/Products';
+import ProductsAdmin from './pages/admin/ProductsAdmin';
 import Orders from './pages/admin/Orders';
 
 import AIChatBot from './components/AIChatBot';
@@ -79,7 +77,10 @@ function App() {
                 {/* ADMIN ROUTES */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route path="dashboard" element={<Dashboard />} />
-                  <Route path="products" element={<Products />} />
+
+                  {/* FIXED HERE */}
+                  <Route path="products" element={<ProductsAdmin />} />
+
                   <Route path="orders" element={<Orders />} />
                 </Route>
 

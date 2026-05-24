@@ -24,7 +24,15 @@ export default function Home() {
         console.log('Supabase error:', error);
         setFeatured([]);
       } else {
-        setFeatured(data || []);
+        // 🧠 NORMALIZE DATA (THIS FIXES IMAGE + PRICE ISSUES)
+        const safeData = (data || []).map((p: any) => ({
+          ...p,
+          price: Number(p.price || 0),
+          image: p.image_url || p.image || 'https://via.placeholder.com/600',
+          in_stock: p.in_stock ?? true,
+        }));
+
+        setFeatured(safeData);
       }
 
       setLoading(false);
