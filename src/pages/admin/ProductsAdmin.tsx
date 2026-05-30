@@ -1,61 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import toast from "react-hot-toast";
 
-type Product = {
+interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
-  stock: number;
-};
+  image_url: string;
+  description: string;
+  category: string;
+  created_at?: string;
+}
 
 export default function ProductsAdmin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // CREATE FORM
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState<string>(""); // string = FIX
-  const [image, setImage] = useState("");
-  const [stock, setStock] = useState<string>("1");
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
-  // EDIT MODE
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editPrice, setEditPrice] = useState<string>("");
-  const [editStock, setEditStock] = useState<string>("");
+  const [editing, setEditing] = useState<Product | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  // ---------------- IMAGE UPLOAD ----------------
-  const uploadImage = async (file: File) => {
-    const fileName = `${Date.now()}-${file.name}`;
-
-    const { error } = await supabase.storage
-      .from("products")
-      .upload(fileName, file);
-
-    if (error) {
-      console.log("Upload error:", error);
-      return null;
-    }
-
-    const { data } = supabase.storage
-      .from("products")
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
-  };
-
-  // ---------------- FETCH ----------------
+  // FETCH PRODUCTS
   const fetchProducts = async () => {
-    setLoading(true);
-
     const { data, error } = await supabase
       .from("products")
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error) setProducts(data || []);
+    if (error) toast.error(error.message);
 
+    setProducts(data || []);
     setLoading(false);
   };
 
@@ -63,231 +39,221 @@ export default function ProductsAdmin() {
     fetchProducts();
   }, []);
 
-  // ---------------- ADD ----------------
-  const addProduct = async () => {
-    if (!name || !price) return;
-
-    const { error } = await supabase.from("products").insert([
-      {
-        name: name.trim(),
-        price: Number(price),
-        image: image || "",
-        stock: Number(stock),
-      },
-    ]);
-
-    if (!error) {
-      setName("");
-      setPrice("");
-      setImage("");
-      setStock("1");
-      fetchProducts();
-    } else {
-      console.log(error);
-    }
-  };
-
-  // ---------------- DELETE ----------------
+  // DELETE PRODUCT
   const deleteProduct = async (id: string) => {
-    await supabase.from("products").delete().eq("id", id);
+    if (!confirm("Delete this product?")) return;
+
+    const { error } = await supabase.from("products").delete().eq("id", id);
+
+    if (error) return toast.error(error.message);
+
+    toast.success("Product deleted");
     fetchProducts();
   };
 
-  // ---------------- EDIT ----------------
-  const startEdit = (p: Product) => {
-    setEditingId(p.id);
-    setEditName(p.name);
-    setEditPrice(String(p.price));
-    setEditStock(String(p.stock));
-  };
+  // UPDATE PRODUCT
+  const updateProduct = async () => {
+    if (!editing) return;
 
-  const saveEdit = async () => {
-    if (!editingId) return;
+    setSaving(true);
 
     const { error } = await supabase
       .from("products")
       .update({
-        name: editName.trim(),
-        price: Number(editPrice),
-        stock: Number(editStock),
+        name: editing.name,
+        price: editing.price,
+        category: editing.category,
+        image_url: editing.image_url,
+        description: editing.description,
       })
-      .eq("id", editingId);
+      .eq("id", editing.id);
 
-    if (!error) {
-      setEditingId(null);
-      fetchProducts();
-    }
+    setSaving(false);
+
+    if (error) return toast.error(error.message);
+
+    toast.success("Product updated");
+    setEditing(null);
+    fetchProducts();
   };
 
+  // FILTERED PRODUCTS
+  const filtered = useMemo(() => {
+    return products.filter((p) => {
+      return (
+        p.name?.toLowerCase().includes(search.toLowerCase()) &&
+        (categoryFilter === "" || p.category === categoryFilter)
+      );
+    });
+  }, [products, search, categoryFilter]);
+
+  const categories = [...new Set(products.map((p) => p.category))];
+
+  // DASHBOARD STATS
+  const totalProducts = products.length;
+  const totalCategories = categories.length;
+  const avgPrice =
+    products.reduce((sum, p) => sum + (p.price || 0), 0) /
+    (products.length || 1);
+
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 bg-gray-50 min-h-screen">
 
-      <h1 className="text-2xl font-bold mb-6">Products Admin 🛍️</h1>
-
-      {/* CREATE PRODUCT */}
-      <div className="bg-white p-4 shadow rounded mb-6 space-y-3">
-
-        <input
-          className="border p-2 w-full"
-          placeholder="Product name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-
-        {/* PRICE INPUT FIXED */}
-        <input
-          className="border p-2 w-full"
-          placeholder="Amount (e.g 15000)"
-          value={price}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === "" || /^\d*$/.test(val)) {
-              setPrice(val);
-            }
-          }}
-        />
-
-        {/* IMAGE UPLOAD */}
-        <input
-          type="file"
-          accept="image/*"
-          className="border p-2 w-full"
-          onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            const url = await uploadImage(file);
-            if (url) setImage(url);
-          }}
-        />
-
-        {image && (
-          <img src={image} className="w-24 h-24 object-cover rounded" />
-        )}
-
-        <input
-          className="border p-2 w-full"
-          placeholder="Stock"
-          value={stock}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === "" || /^\d*$/.test(val)) {
-              setStock(val);
-            }
-          }}
-        />
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Products Dashboard</h1>
 
         <button
-          onClick={addProduct}
-          className="bg-black text-white px-4 py-2 w-full"
+          onClick={() => (window.location.href = "/admin/products/add")}
+          className="bg-black text-white px-4 py-2 rounded"
         >
-          Add Product
+          + Add Product
         </button>
       </div>
 
-      {/* LIST */}
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-gray-500 text-sm">Total Products</p>
+          <h2 className="text-xl font-bold">{totalProducts}</h2>
+        </div>
+
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-gray-500 text-sm">Categories</p>
+          <h2 className="text-xl font-bold">{totalCategories}</h2>
+        </div>
+
+        <div className="bg-white p-4 rounded shadow">
+          <p className="text-gray-500 text-sm">Avg Price</p>
+          <h2 className="text-xl font-bold">₦{Math.round(avgPrice)}</h2>
+        </div>
+      </div>
+
+      {/* FILTERS */}
+      <div className="flex gap-3 mb-6">
+        <input
+          className="border p-2 flex-1"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <select
+          className="border p-2"
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c}>{c}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* PRODUCTS GRID */}
       {loading ? (
         <p>Loading...</p>
       ) : (
-        <div className="space-y-3">
+        <div className="grid md:grid-cols-3 gap-4">
+          {filtered.map((p) => (
+            <div key={p.id} className="bg-white rounded shadow overflow-hidden">
 
-          {products.map((p) => {
+              <img
+                src={p.image_url}
+                className="h-44 w-full object-cover"
+              />
 
-            // SAFE IMAGE FIX
-            const img =
-              p.image ||
-              "https://via.placeholder.com/200";
+              <div className="p-4 space-y-2">
+                <h2 className="font-bold">{p.name}</h2>
+                <p className="text-sm text-gray-500">{p.category}</p>
+                <p className="font-semibold">₦{p.price}</p>
 
-            return (
-              <div key={p.id} className="bg-gray-100 p-3 rounded">
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => setEditing(p)}
+                    className="flex-1 bg-blue-500 text-white py-1 rounded"
+                  >
+                    Edit
+                  </button>
 
-                {editingId === p.id ? (
-                  <div className="space-y-2">
-
-                    <input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="border p-1 w-full"
-                    />
-
-                    <input
-                      value={editPrice}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "" || /^\d*$/.test(val)) {
-                          setEditPrice(val);
-                        }
-                      }}
-                      className="border p-1 w-full"
-                    />
-
-                    <input
-                      value={editStock}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === "" || /^\d*$/.test(val)) {
-                          setEditStock(val);
-                        }
-                      }}
-                      className="border p-1 w-full"
-                    />
-
-                    <div className="flex gap-2">
-                      <button
-                        onClick={saveEdit}
-                        className="bg-green-600 text-white px-3 py-1"
-                      >
-                        Save
-                      </button>
-
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="bg-gray-400 px-3 py-1"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex justify-between items-center">
-
-                    <div>
-                      <p className="font-bold">{p.name}</p>
-                      <p>₦{p.price}</p>
-                      <p className="text-sm text-gray-500">
-                        Stock: {p.stock}
-                      </p>
-
-                      <img
-                        src={img}
-                        className="w-16 h-16 object-cover mt-2 rounded"
-                      />
-                    </div>
-
-                    <div className="flex gap-2 items-center">
-
-                      <button
-                        onClick={() => startEdit(p)}
-                        className="bg-blue-500 text-white px-2 py-1"
-                      >
-                        Edit
-                      </button>
-
-                      <button
-                        onClick={() => deleteProduct(p.id)}
-                        className="bg-red-500 text-white px-2 py-1"
-                      >
-                        Delete
-                      </button>
-
-                    </div>
-                  </div>
-                )}
-
+                  <button
+                    onClick={() => deleteProduct(p.id)}
+                    className="flex-1 bg-red-500 text-white py-1 rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
+        </div>
+      )}
 
+      {/* EDIT MODAL */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/50 flex justify-end">
+          <div className="w-[420px] bg-white h-full p-6 space-y-3">
+
+            <h2 className="text-xl font-bold">Edit Product</h2>
+
+            <input
+              className="w-full border p-2"
+              value={editing.name}
+              onChange={(e) =>
+                setEditing({ ...editing, name: e.target.value })
+              }
+            />
+
+            <input
+              className="w-full border p-2"
+              value={editing.price}
+              onChange={(e) =>
+                setEditing({ ...editing, price: Number(e.target.value) })
+              }
+            />
+
+            <input
+              className="w-full border p-2"
+              value={editing.category}
+              onChange={(e) =>
+                setEditing({ ...editing, category: e.target.value })
+              }
+            />
+
+            <input
+              className="w-full border p-2"
+              value={editing.image_url}
+              onChange={(e) =>
+                setEditing({ ...editing, image_url: e.target.value })
+              }
+            />
+
+            <textarea
+              className="w-full border p-2"
+              value={editing.description}
+              onChange={(e) =>
+                setEditing({ ...editing, description: e.target.value })
+              }
+            />
+
+            <div className="flex gap-2 pt-4">
+              <button
+                onClick={() => setEditing(null)}
+                className="flex-1 border"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={updateProduct}
+                disabled={saving}
+                className="flex-1 bg-black text-white"
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
     </div>
