@@ -1,99 +1,37 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { CartProvider } from './hooks/useCart';
-import { CurrencyProvider } from './hooks/useCurrency';
-import { AuthProvider } from './hooks/useAuth';
+// PUBLIC PAGES
+import Home from "./pages/Home";
+import Shop from "./pages/Shop";
+import ProductDetail from "./pages/ProductDetail";
 
-import Layout from './components/Layout';
+// ADMIN PAGES
+import ProductsAdmin from "./pages/admin/ProductsAdmin";
+import AddProduct from "./pages/admin/AddProduct";
 
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import ProductDetail from './pages/ProductDetail';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Checkout from './pages/Checkout';
+// OPTIONAL LAYOUT (if you use it)
+import Layout from "./components/Layout";
 
-import Login from './pages/Login';
-import Register from './pages/Register';
-import ResetPassword from './pages/ResetPassword';
-
-import AdminLayout from './layouts/AdminLayout';
-import Dashboard from './pages/admin/Dashboard';
-import ProductsAdmin from './pages/admin/ProductsAdmin';
-import Orders from './pages/admin/Orders';
-
-import AIChatBot from './components/AIChatBot';
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
-  }, [pathname]);
-
-  return null;
-}
-
-function ChatBotWidget() {
-  const { pathname } = useLocation();
-
-  if (
-    pathname === '/admin' ||
-    pathname === '/login' ||
-    pathname === '/register'
-  ) {
-    return null;
-  }
-
-  return <AIChatBot />;
-}
-
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <CurrencyProvider>
-          <CartProvider>
-            <ScrollToTop />
+      <Routes>
 
-            <div className="min-h-screen bg-white flex flex-col">
-              <Routes>
+        {/* PUBLIC ROUTES */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+        </Route>
 
-                {/* PUBLIC ROUTES */}
-                <Route element={<Layout />}>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/checkout" element={<Checkout />} />
+        {/* ADMIN ROUTES */}
+        <Route path="/admin/products" element={<ProductsAdmin />} />
+        <Route path="/admin/products/add" element={<AddProduct />} />
 
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                </Route>
+        {/* FALLBACK */}
+        <Route path="*" element={<div>Page Not Found</div>} />
 
-                {/* ADMIN ROUTES */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route path="dashboard" element={<Dashboard />} />
-
-                  {/* FIXED HERE */}
-                  <Route path="products" element={<ProductsAdmin />} />
-
-                  <Route path="orders" element={<Orders />} />
-                </Route>
-
-              </Routes>
-
-              <ChatBotWidget />
-            </div>
-
-          </CartProvider>
-        </CurrencyProvider>
-      </AuthProvider>
+      </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
