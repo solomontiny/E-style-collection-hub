@@ -9,7 +9,7 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductsAdmin from "./pages/admin/ProductsAdmin";
 import AddProduct from "./pages/admin/AddProduct";
 
-// OPTIONAL LAYOUT (if you use it)
+// LAYOUT
 import Layout from "./components/Layout";
 
 export default function App() {
@@ -17,18 +17,18 @@ export default function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* PUBLIC ROUTES */}
+        {/* PUBLIC ROUTES (WITH LAYOUT) */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
         </Route>
 
-        {/* ADMIN ROUTES */}
+        {/* ADMIN ROUTES (NO LAYOUT WRAPPER) */}
         <Route path="/admin/products" element={<ProductsAdmin />} />
         <Route path="/admin/products/add" element={<AddProduct />} />
 
-        {/* FALLBACK */}
+        {/* FALLBACK ROUTE */}
         <Route path="*" element={<div>Page Not Found</div>} />
 
       </Routes>
