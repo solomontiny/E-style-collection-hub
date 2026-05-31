@@ -27,11 +27,19 @@ export default function Navbar() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const { itemCount, toggleCart } = useCart();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const { setCurrency, info } = useCurrency();
   const location = useLocation();
 
   const isHome = location.pathname === '/';
+
+  // 🚨 DEBUG AUTH STATE
+  useEffect(() => {
+    console.log("🔥 AUTH DEBUG STATE:", {
+      user,
+      isAdmin
+    });
+  }, [user, isAdmin]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -56,24 +64,19 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-[72px]">
 
             {/* LOGO */}
-            <Link to="/" className="transition-opacity duration-300 hover:opacity-80">
+            <Link to="/" className="hover:opacity-80">
               <Logo textColor={textColor} />
             </Link>
 
-            {/* NAV LINKS */}
+            {/* NAV */}
             <nav className="hidden lg:flex items-center gap-10">
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`relative text-[11px] tracking-[0.18em] uppercase font-medium ${textColor} transition-colors duration-300 group`}
+                  className={`text-[11px] uppercase tracking-[0.18em] font-medium ${textColor}`}
                 >
                   {link.label}
-                  <span
-                    className={`absolute -bottom-1 left-0 h-px bg-current transition-all duration-300 ${
-                      location.pathname === link.to ? 'w-full' : 'w-0 group-hover:w-full'
-                    }`}
-                  />
                 </Link>
               ))}
             </nav>
@@ -81,94 +84,72 @@ export default function Navbar() {
             {/* RIGHT SIDE */}
             <div className="flex items-center gap-3 sm:gap-4">
 
-              {/* ✅ FIXED ADMIN LINK (TEMP SAFE VERSION) */}
+              {/* 🚨 TEMP ADMIN DEBUG LINK (ALWAYS SHOWS IF USER EXISTS OR NOT) */}
               {user && (
                 <Link
                   to="/admin/products"
-                  className="text-[10px] px-2 py-1 border rounded opacity-70 hover:opacity-100"
+                  className="text-[10px] px-2 py-1 border rounded opacity-80 hover:opacity-100"
                 >
                   Admin
                 </Link>
               )}
 
+              {/* 🔥 TEMP SAFETY NET (REMOVE LATER) */}
+              {!user && (
+                <Link
+                  to="/login"
+                  className="text-[10px] px-2 py-1 border rounded opacity-80"
+                >
+                  Login
+                </Link>
+              )}
+
               {/* Currency */}
               <div className="relative hidden sm:block">
-                <button
-                  onClick={() => setCurrencyOpen(!currencyOpen)}
-                  className={`flex items-center gap-1 text-[11px] tracking-wider font-medium ${textColor}`}
-                >
-                  {info.symbol} {info.code} <ChevronDown size={12} />
+                <button onClick={() => setCurrencyOpen(!currencyOpen)}>
+                  {info.symbol} {info.code}
                 </button>
-
-                {currencyOpen && (
-                  <div className="absolute right-0 top-full mt-2 bg-white border shadow-xl rounded-lg py-1 min-w-[100px] z-50">
-                    {CURRENCY_OPTIONS.map((opt) => (
-                      <button
-                        key={opt.code}
-                        onClick={() => {
-                          setCurrency(opt.code);
-                          setCurrencyOpen(false);
-                        }}
-                        className="w-full text-left px-4 py-2 text-[12px] hover:bg-stone-50"
-                      >
-                        {opt.symbol} {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
-              {/* AUTH */}
+              {/* AUTH ICON */}
               {user ? (
-                <div className="relative group">
-                  <button className={`flex items-center gap-1.5 ${textColor}`}>
-                    <User size={18} />
+                <div className="relative">
+                  <button>
+                    <User />
                   </button>
 
-                  <div className="absolute right-0 top-full mt-2 bg-white border shadow-xl rounded-lg py-1 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <div className="absolute right-0 bg-white border shadow-md">
+                    <div className="p-2 text-xs">{user.email}</div>
 
-                    <div className="px-4 py-2 border-b">
-                      <p className="text-[12px] truncate">{user.email}</p>
-                    </div>
+                    <Link to="/admin/products" className="block px-3 py-2 text-xs">
+                      Admin Products
+                    </Link>
 
-                    {/* ADMIN LINKS */}
-                    {user && (
-                      <>
-                        <Link to="/admin/products" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
-                          Products
-                        </Link>
-                        <Link to="/admin/products/add" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
-                          Add Product
-                        </Link>
-                      </>
-                    )}
+                    <Link to="/admin/products/add" className="block px-3 py-2 text-xs">
+                      Add Product
+                    </Link>
 
-                    <button
-                      onClick={signOut}
-                      className="w-full text-left px-4 py-2 text-[12px] text-red-500 hover:bg-red-50"
-                    >
+                    <button onClick={signOut} className="px-3 py-2 text-xs text-red-500">
                       Sign Out
                     </button>
                   </div>
                 </div>
               ) : (
                 <Link to="/login">
-                  <User size={18} />
+                  <User />
                 </Link>
               )}
 
               {/* CART */}
-              <button onClick={() => toggleCart(true)} className="relative">
-                <ShoppingBag size={20} />
+              <button onClick={() => toggleCart(true)}>
+                <ShoppingBag />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-brand-600 text-white text-[9px] rounded-full px-1">
-                    {itemCount}
-                  </span>
+                  <span>{itemCount}</span>
                 )}
               </button>
 
-              {/* MOBILE MENU */}
-              <button className="lg:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+              {/* MOBILE */}
+              <button onClick={() => setMobileOpen(!mobileOpen)}>
                 {mobileOpen ? <X /> : <Menu />}
               </button>
             </div>
@@ -178,29 +159,17 @@ export default function Navbar() {
 
       {/* MOBILE MENU */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setMobileOpen(false)} />
-
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-white p-6">
+        <div className="fixed inset-0 bg-black/30 lg:hidden">
+          <div className="absolute right-0 top-0 w-72 h-full bg-white p-5">
 
             {NAV_LINKS.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm"
-              >
+              <Link key={link.to} to={link.to}>
                 {link.label}
               </Link>
             ))}
 
-            {/* ADMIN MOBILE */}
             {user && (
-              <Link
-                to="/admin/products"
-                onClick={() => setMobileOpen(false)}
-                className="block py-3 text-sm font-semibold text-blue-600"
-              >
+              <Link to="/admin/products">
                 Admin Products
               </Link>
             )}
