@@ -1,0 +1,37 @@
+[33m04800d3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m fix: complete admin routing system (add + edit + list)
+[33mefed5cb[m feat: upgrade ProductsAdmin to Shopify-style edit routing system
+[33ma168df3[m ui: upgrade AddProduct Shopify-style responsive + categories + back button
+[33m3e3168e[m fix: repair admin routing for AddProduct page
+[33mcf7529c[m feat: Shopify-style Add Product with image upload
+[33m6de8cc5[m fix: add react-hot-toast dependency
+[33mc148f95[m ui: upgrade admin dashboard to enterprise style
+[33m85db930[m fix: update footer branding name
+[33mff18972[m upgrade admin dashboard, supabase client, and dependencies
+[33mdc6c9e1[m Deleted vite.config.ts.timestamp-1779693134571-53621882605398.mjs
+[33mee7395b[m Added vite.config.ts.timestamp-1779693134571-53621882605398.mjs
+[33md15555e[m Fix product admin, ProductCard, image and price handling
+[33m52402de[m Added admin panel and fixed Supabase queries
+[33mac1c808[m fix supabase connection
+[33m8c3f8bf[m fix chatbot stable version
+[33m4fabf5c[m Updated package-lock.json
+[33m812e304[m Fix chatbot UI and Supabase chat handler
+[33me2c2ea9[m fix AI chatbot integration
+[33m8de39b3[m fix chatbot structure
+[33m160568e[m add chatbot debug logging fix
+[33m129157c[m fix chatbot full rebuild
+[33m73c96c6[m fix chatbot final integration
+[33m9430013[m fix chatbot integration
+[33md4a7165[m restore openai whatsapp assistant
+[33ma32b813[m fix openai env
+[33m6c3a6c9[m add env variables fix
+[33m703e3cc[m add whatsapp AI assistant
+[33m00079f2[m Apply E Style Collection branding & gold theme
+[33m6f11577[m Added WhatsApp_Image_2026-05-21_at_3.08.26_PM.jpeg
+[33m8a5cd02[m Fix admin RLS circular reference
+[33m0dec02e[m Add AI Chatbot & Enhance Admin Auth
+[33maa42ffe[m Add AI Chat, Map & Fix Admin Dashboard
+[33m3c26e5f[m Updated useAuth.tsx
+[33mdffbd39[m Added 20260519152601_fix_security_issues.sql
+[33med288ed[m Updated App.tsx
+[33me0a62c5[m Updated tailwind.config.js
+[33mf814fa1[m Start repository
