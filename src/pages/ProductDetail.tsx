@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ShoppingBag, ArrowLeft } from "lucide-react";
 
-import { supabase } from '../lib/supabase';
-import { useCart } from '../hooks/useCart';
-import { useCurrency } from '../hooks/useCurrency';
+import { supabase } from "../lib/supabase";
+import { useCart } from "../hooks/useCart";
+import { useCurrency } from "../hooks/useCurrency";
 
-import type { Product } from '../types';
+import type { Product } from "../types";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -14,8 +14,8 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
@@ -25,68 +25,53 @@ export default function ProductDetail() {
   useEffect(() => {
     if (!id) return;
 
-    setLoading(true);
+    const fetchProduct = async () => {
+      setLoading(true);
 
-    supabase
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) {
-          setProduct(null);
-          setLoading(false);
-          return;
-        }
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
 
-        setProduct(data);
-
-        const sizes = Array.isArray((data as any).sizes)
-          ? (data as any).sizes
-          : [];
-
-        const colors = Array.isArray((data as any).colors)
-          ? (data as any).colors
-          : [];
-
-        setSelectedSize(sizes[0] || '');
-        setSelectedColor(colors[0] || '');
-
+      if (error || !data) {
+        setProduct(null);
         setLoading(false);
-      });
+        return;
+      }
+
+      const typedProduct = data as Product;
+
+      setProduct(typedProduct);
+
+      setSelectedSize(typedProduct.sizes?.[0] || "");
+      setSelectedColor(typedProduct.colors?.[0] || "");
+
+      setLoading(false);
+    };
+
+    fetchProduct();
   }, [id]);
 
   if (loading) {
-    return (
-      <div className="p-10 animate-pulse">Loading...</div>
-    );
+    return <div className="p-10">Loading...</div>;
   }
 
   if (!product) {
-    return (
-      <div className="p-10">
-        Product not found
-      </div>
-    );
+    return <div className="p-10">Product not found</div>;
   }
 
-  // 🖼️ SAFE IMAGE HANDLING
   const baseImage =
-    (product as any).image_url ||
-    (product as any).image ||
-    'https://via.placeholder.com/600';
-
-  const extraImages = Array.isArray((product as any).images)
-    ? (product as any).images
-    : [];
+    product.image_url ||
+    product.images?.[0] ||
+    "https://via.placeholder.com/600";
 
   const allImages = [
     baseImage,
-    ...extraImages.filter((i: string) => i !== baseImage),
+    ...(product.images?.filter((img) => img !== baseImage) || []),
   ];
 
-  // 💰 SAFE PRICE
-  const price = Number((product as any).price || 0);
+  const price = product.price ?? 0;
 
   const handleAdd = () => {
     addItem(product, selectedSize, selectedColor, quantity);
@@ -96,7 +81,7 @@ export default function ProductDetail() {
     <div className="max-w-6xl mx-auto p-6">
 
       {/* BACK */}
-      <Link to="/shop" className="text-sm text-gray-500 flex items-center gap-2">
+      <Link to="/shop" className="flex items-center gap-2 text-gray-500">
         <ArrowLeft size={14} /> Back
       </Link>
 
@@ -116,7 +101,7 @@ export default function ProductDetail() {
                 src={img}
                 onClick={() => setSelectedImage(i)}
                 className={`w-16 h-16 object-cover cursor-pointer border ${
-                  selectedImage === i ? 'border-black' : 'border-transparent'
+                  selectedImage === i ? "border-black" : "border-transparent"
                 }`}
               />
             ))}
@@ -125,34 +110,23 @@ export default function ProductDetail() {
 
         {/* DETAILS */}
         <div>
+          <h1 className="text-3xl font-bold">{product.name}</h1>
 
-          <h1 className="text-3xl font-bold">
-            {product.name}
-          </h1>
+          <p className="text-2xl mt-2">{format(price)}</p>
 
-          {/* 💰 PRICE */}
-          <p className="text-2xl mt-2 font-light">
-            {format(price)}
-          </p>
-
-          <p className="text-gray-500 mt-4">
-            {product.description}
-          </p>
+          <p className="text-gray-500 mt-4">{product.description}</p>
 
           {/* COLORS */}
-          {(product as any).colors?.length > 0 && (
+          {product.colors?.length > 0 && (
             <div className="mt-6">
               <p className="text-sm font-medium">Color</p>
-
               <div className="flex gap-2 mt-2">
-                {(product as any).colors.map((c: string) => (
+                {product.colors.map((c) => (
                   <button
                     key={c}
                     onClick={() => setSelectedColor(c)}
                     className={`px-3 py-1 border rounded-full ${
-                      selectedColor === c
-                        ? 'bg-black text-white'
-                        : ''
+                      selectedColor === c ? "bg-black text-white" : ""
                     }`}
                   >
                     {c}
@@ -163,19 +137,16 @@ export default function ProductDetail() {
           )}
 
           {/* SIZES */}
-          {(product as any).sizes?.length > 0 && (
+          {product.sizes?.length > 0 && (
             <div className="mt-6">
               <p className="text-sm font-medium">Size</p>
-
               <div className="flex gap-2 mt-2">
-                {(product as any).sizes.map((s: string) => (
+                {product.sizes.map((s) => (
                   <button
                     key={s}
                     onClick={() => setSelectedSize(s)}
                     className={`w-10 h-10 border ${
-                      selectedSize === s
-                        ? 'bg-black text-white'
-                        : ''
+                      selectedSize === s ? "bg-black text-white" : ""
                     }`}
                   >
                     {s}
@@ -188,12 +159,9 @@ export default function ProductDetail() {
           {/* QUANTITY */}
           <div className="mt-6">
             <p className="text-sm font-medium">Quantity</p>
-
             <div className="flex items-center gap-3 mt-2">
               <button
-                onClick={() =>
-                  setQuantity((q) => Math.max(1, q - 1))
-                }
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 className="w-10 h-10 border"
               >
                 -
@@ -210,7 +178,7 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* ADD BUTTON */}
+          {/* ADD TO CART */}
           <button
             onClick={handleAdd}
             className="w-full mt-8 bg-black text-white py-3 flex items-center justify-center gap-2"
@@ -218,8 +186,8 @@ export default function ProductDetail() {
             <ShoppingBag size={16} />
             Add to Cart
           </button>
-
         </div>
+
       </div>
     </div>
   );
