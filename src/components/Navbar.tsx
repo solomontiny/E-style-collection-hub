@@ -71,9 +71,7 @@ export default function Navbar() {
                   {link.label}
                   <span
                     className={`absolute -bottom-1 left-0 h-px bg-current transition-all duration-300 ${
-                      location.pathname === link.to
-                        ? 'w-full'
-                        : 'w-0 group-hover:w-full'
+                      location.pathname === link.to ? 'w-full' : 'w-0 group-hover:w-full'
                     }`}
                   />
                 </Link>
@@ -83,13 +81,15 @@ export default function Navbar() {
             {/* RIGHT SIDE */}
             <div className="flex items-center gap-3 sm:gap-4">
 
-              {/* DEV ADMIN QUICK ACCESS (FIX) */}
-              <Link
-                to="/admin/dashboard"
-                className="text-[10px] px-2 py-1 border rounded opacity-60 hover:opacity-100"
-              >
-                Admin
-              </Link>
+              {/* 🔥 FIXED ADMIN LINK */}
+              {isAdmin && (
+                <Link
+                  to="/admin/products"
+                  className="text-[10px] px-2 py-1 border rounded opacity-70 hover:opacity-100"
+                >
+                  Admin
+                </Link>
+              )}
 
               {/* Currency */}
               <div className="relative hidden sm:block">
@@ -139,14 +139,11 @@ export default function Navbar() {
 
                     {isAdmin && (
                       <>
-                        <Link to="/admin/dashboard" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
-                          Dashboard
-                        </Link>
                         <Link to="/admin/products" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
                           Products
                         </Link>
-                        <Link to="/admin/orders" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
-                          Orders
+                        <Link to="/admin/products/add" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
+                          Add Product
                         </Link>
                       </>
                     )}
@@ -202,14 +199,16 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* DEV ADMIN FIX */}
-            <Link
-              to="/admin/dashboard"
-              onClick={() => setMobileOpen(false)}
-              className="block py-3 text-sm font-semibold text-blue-600"
-            >
-              Admin Dashboard
-            </Link>
+            {/* 🔥 FIXED ADMIN MOBILE LINK */}
+            {isAdmin && (
+              <Link
+                to="/admin/products"
+                onClick={() => setMobileOpen(false)}
+                className="block py-3 text-sm font-semibold text-blue-600"
+              >
+                Admin Products
+              </Link>
+            )}
 
           </div>
         </div>
