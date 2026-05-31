@@ -27,8 +27,8 @@ export default function Navbar() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
   const { itemCount, toggleCart } = useCart();
-  const { user, isAdmin, signOut } = useAuth();
-  const { currency, setCurrency, info } = useCurrency();
+  const { user, signOut } = useAuth();
+  const { setCurrency, info } = useCurrency();
   const location = useLocation();
 
   const isHome = location.pathname === '/';
@@ -81,8 +81,8 @@ export default function Navbar() {
             {/* RIGHT SIDE */}
             <div className="flex items-center gap-3 sm:gap-4">
 
-              {/* 🔥 FIXED ADMIN LINK */}
-              {isAdmin && (
+              {/* ✅ FIXED ADMIN LINK (TEMP SAFE VERSION) */}
+              {user && (
                 <Link
                   to="/admin/products"
                   className="text-[10px] px-2 py-1 border rounded opacity-70 hover:opacity-100"
@@ -123,12 +123,6 @@ export default function Navbar() {
                 <div className="relative group">
                   <button className={`flex items-center gap-1.5 ${textColor}`}>
                     <User size={18} />
-
-                    {isAdmin && (
-                      <span className="hidden sm:inline text-[9px] uppercase bg-brand-600 text-white px-1.5 py-0.5 rounded">
-                        Admin
-                      </span>
-                    )}
                   </button>
 
                   <div className="absolute right-0 top-full mt-2 bg-white border shadow-xl rounded-lg py-1 min-w-[160px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
@@ -137,7 +131,8 @@ export default function Navbar() {
                       <p className="text-[12px] truncate">{user.email}</p>
                     </div>
 
-                    {isAdmin && (
+                    {/* ADMIN LINKS */}
+                    {user && (
                       <>
                         <Link to="/admin/products" className="block px-4 py-2 text-[12px] hover:bg-stone-50">
                           Products
@@ -199,8 +194,8 @@ export default function Navbar() {
               </Link>
             ))}
 
-            {/* 🔥 FIXED ADMIN MOBILE LINK */}
-            {isAdmin && (
+            {/* ADMIN MOBILE */}
+            {user && (
               <Link
                 to="/admin/products"
                 onClick={() => setMobileOpen(false)}
