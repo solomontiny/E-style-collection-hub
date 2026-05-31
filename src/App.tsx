@@ -8,27 +8,34 @@ import ProductDetail from "./pages/ProductDetail";
 // ADMIN PAGES
 import ProductsAdmin from "./pages/admin/ProductsAdmin";
 import AddProduct from "./pages/admin/AddProduct";
+import Dashboard from "./pages/admin/Dashboard";
+import Orders from "./pages/admin/Orders";
 
 // LAYOUT
 import Layout from "./components/Layout";
+import AdminLayout from "./pages/admin/AdminLayout";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* PUBLIC ROUTES (WITH LAYOUT) */}
+        {/* ================= PUBLIC ROUTES ================= */}
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/product/:id" element={<ProductDetail />} />
         </Route>
 
-        {/* ADMIN ROUTES (NO LAYOUT WRAPPER) */}
-        <Route path="/admin/products" element={<ProductsAdmin />} />
-        <Route path="/admin/products/add" element={<AddProduct />} />
+        {/* ================= ADMIN ROUTES ================= */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="products" element={<ProductsAdmin />} />
+          <Route path="products/add" element={<AddProduct />} />
+          <Route path="orders" element={<Orders />} />
+        </Route>
 
-        {/* FALLBACK ROUTE */}
+        {/* ================= FALLBACK ================= */}
         <Route path="*" element={<div>Page Not Found</div>} />
 
       </Routes>
