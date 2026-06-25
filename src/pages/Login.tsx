@@ -14,7 +14,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
-  const [resetSent, setResetSent] = useState(false);
   const { signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,11 +66,10 @@ export default function Login() {
         setError(error.message);
       } else {
         setSuccess('Password reset email sent! Check your inbox for a link to reset your password.');
-        setResetSent(true);
         setTimeout(() => {
           setResetMode(false);
           setResetEmail('');
-          setResetSent(false);
+          setSuccess('');
         }, 3000);
       }
     } catch (err) {

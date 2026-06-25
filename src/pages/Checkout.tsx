@@ -66,14 +66,15 @@ export default function Checkout() {
 
       if (itemsError) throw itemsError;
 
-      // 3. OPTIONAL: STOCK REDUCTION (IMPORTANT FOR STORE CONTROL)
+      // 3. Optional stock reduction
       for (const item of items) {
-        await supabase
-          .from('products')
-          .update({
-            stock: item.product.stock - item.quantity,
-          })
-          .eq('id', item.product.id);
+        const currentQty = (item.product.stock_quantity ?? 0);
+        if (currentQty > 0) {
+          await supabase
+            .from('products')
+            .update({ stock_quantity: Math.max(0, currentQty - item.quantity) })
+            .eq('id', item.product.id);
+        }
       }
 
       // 4. CLEAR CART + COMPLETE

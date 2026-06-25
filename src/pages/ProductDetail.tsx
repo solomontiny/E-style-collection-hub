@@ -74,7 +74,9 @@ export default function ProductDetail() {
   const price = product.price ?? 0;
 
   const handleAdd = () => {
-    addItem(product, selectedSize, selectedColor, quantity);
+    for (let i = 0; i < quantity; i++) {
+      addItem(product, selectedSize, selectedColor);
+    }
   };
 
   return (

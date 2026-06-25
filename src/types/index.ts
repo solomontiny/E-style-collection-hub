@@ -10,6 +10,18 @@ export interface Product {
   colors: string[];
   in_stock: boolean;
   featured: boolean;
+  stock_quantity: number;
+  sku: string;
+  collection_id?: string;
+  created_at: string;
+}
+
+export interface Collection {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string;
   created_at: string;
 }
 
@@ -34,15 +46,6 @@ export interface Order {
   created_at: string;
 }
 
-export interface Profile {
-  id: string;
-  email: string;
-  full_name: string;
-  role: "admin" | "customer";
-  phone: string;
-  created_at: string;
-}
-
 export interface OrderItem {
   id: string;
   order_id: string;
@@ -52,5 +55,14 @@ export interface OrderItem {
   price: number;
   size: string;
   color: string;
+  created_at: string;
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "admin" | "customer";
+  phone: string;
   created_at: string;
 }

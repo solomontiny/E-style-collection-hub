@@ -1,48 +1,28 @@
 interface LogoProps {
   className?: string;
   textColor?: string;
+  size?: "sm" | "md" | "lg";
 }
 
-export default function Logo({ className = '', textColor = 'text-white' }: LogoProps) {
+export default function Logo({ className = "", textColor = "text-white", size = "md" }: LogoProps) {
+  const imgSizes = { sm: "h-7", md: "h-9", lg: "h-12" };
+  const nameSizes = { sm: "text-[12px]", md: "text-[14px]", lg: "text-[18px]" };
+  const subSizes = { sm: "text-[8px]", md: "text-[9px]", lg: "text-[11px]" };
+
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      {/* Logo Icon */}
-      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
-        {/* E with gold accent */}
-        <g>
-          {/* Black strokes */}
-          <path d="M8 6h14v2H8V6z" fill="currentColor" />
-          <path d="M8 15h12v2H8v-2z" fill="currentColor" />
-          <path d="M8 24h14v2H8v-2z" fill="currentColor" />
-          <path d="M8 6v20h2V6H8z" fill="currentColor" />
-
-          {/* Gold accent curve */}
-          <path
-            d="M16 12C18 12 20 13 20 15C20 17 18 18 16 18"
-            stroke="currentColor"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
-          <circle cx="18.5" cy="15" r="1.5" fill="url(#goldGradient)" />
-        </g>
-
-        <defs>
-          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#D4AF37" />
-            <stop offset="100%" stopColor="#B8860B" />
-          </linearGradient>
-        </defs>
-      </svg>
-
-      {/* Brand Text */}
+      <img
+        src="/WhatsApp_Image_2026-05-21_at_3.08.26_PM.jpeg"
+        alt="E Style Collection"
+        className={`${imgSizes[size]} w-auto object-contain flex-shrink-0 drop-shadow-sm`}
+      />
       <div className="flex flex-col leading-tight">
-        <div className={`text-[13px] font-display font-semibold tracking-[0.15em] uppercase ${textColor}`}>
+        <span className={`font-display font-bold tracking-[0.12em] uppercase ${nameSizes[size]} ${textColor}`}>
           E Style
-        </div>
-        <div className={`text-[9px] tracking-[0.25em] uppercase font-medium text-gold-500`}>
+        </span>
+        <span className={`tracking-[0.28em] uppercase font-semibold ${subSizes[size]} text-amber-400`}>
           Collection
-        </div>
+        </span>
       </div>
     </div>
   );

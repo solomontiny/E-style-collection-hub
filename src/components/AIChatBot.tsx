@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Minimize2, Maximize2, Trash2, Loader } from 'lucide-react';
+import { MessageCircle, Send, X, Minimize2, Maximize2, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface ChatMessage {
